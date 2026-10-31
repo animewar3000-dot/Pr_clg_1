@@ -9,11 +9,11 @@ export function EventsPage() {
   const supabase = getSupabase();
   const queryClient = useQueryClient();
 
-  const { data: events, isLoading } = useQuery({
+  const { data: events, isLoading, isError: eventsError } = useQuery({
     queryKey: ['events', profile?.college_id],
     queryFn: async () => {
       if (!supabase || !profile) return [];
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('events')
         .select('*')
         .eq('college_id', profile.college_id)
@@ -21,6 +21,7 @@ export function EventsPage() {
         .gte('start_date', new Date().toISOString())
         .order('start_date', { ascending: true })
         .limit(50);
+      if (error) throw error;
       return (data || []) as Event[];
     },
     enabled: !!supabase && !!profile,
@@ -30,8 +31,9 @@ export function EventsPage() {
     queryKey: ['event-registrations', user?.id],
     queryFn: async () => {
       if (!supabase || !user) return [];
-      const { data } = await supabase.from('event_registrations').select('event_id').eq('user_id', user.id).eq('status', 'registered');
-      return (data || []).map(d => d.event_id);
+      const { data, error } = await supabase.from('event_registrations').select('event_id, status').eq('user_id', user.id).in('status', ['registered', 'waitlisted']);
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!supabase && !!user,
   });
@@ -39,21 +41,21 @@ export function EventsPage() {
   const registerMutation = useMutation({
     mutationFn: async (eventId: string) => {
       if (!supabase || !user) throw new Error('Not configured');
-      const { error } = await supabase.from('event_registrations').insert({
-        event_id: eventId,
-        user_id: user.id,
-        status: 'registered',
-      });
+      const { data, error } = await supabase.rpc('register_for_campus_event', { p_event_id: eventId });
       if (error) throw error;
+      return data as 'registered' | 'waitlisted';
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['event-registrations'] }),
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['event-registrations'] }); },
   });
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Events</h1>
 
-      {isLoading ? (
+      {registerMutation.isError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{registerMutation.error instanceof Error ? registerMutation.error.message : 'Registration failed.'}</p>}
+      {eventsError ? (
+        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Events could not be loaded. Check your account approval and database migration status.</p>
+      ) : isLoading ? (
         <div className="text-center py-8 text-gray-500">Loading events...</div>
       ) : !events || events.length === 0 ? (
         <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
@@ -63,7 +65,7 @@ export function EventsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {events.map((event) => {
-            const isRegistered = registrations?.includes(event.id);
+            const registration = registrations?.find(item => item.event_id === event.id);
             return (
               <div key={event.id} className="bg-white border border-gray-200 rounded-lg p-5">
                 <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
@@ -85,8 +87,10 @@ export function EventsPage() {
                   )}
                 </div>
                 <div className="mt-4">
-                  {isRegistered ? (
+                  {registration?.status === 'registered' ? (
                     <span className="text-sm text-green-600 font-medium">✓ Registered</span>
+                  ) : registration?.status === 'waitlisted' ? (
+                    <span className="text-sm font-medium text-amber-700">On the waitlist</span>
                   ) : (
                     <button
                       onClick={() => registerMutation.mutate(event.id)}
