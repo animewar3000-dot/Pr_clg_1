@@ -871,6 +871,50 @@ DROP POLICY IF EXISTS announcements_read_college ON public.announcements;
 CREATE POLICY announcements_read_by_audience ON public.announcements FOR SELECT TO authenticated
 USING (app_private.can_read_announcement(id));
 
+
+-- The conversation list RPC uses the same block-aware membership check.
+CREATE OR REPLACE FUNCTION public.list_my_conversations()
+RETURNS TABLE (
+  id uuid,
+  type text,
+  title text,
+  last_message_at timestamptz,
+  other_display_name text,
+  other_avatar_url text
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $
+BEGIN
+  IF auth.uid() IS NULL OR NOT app_private.is_active_college_member(app_private.current_college_id()) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    c.id,
+    c.type,
+    c.title,
+    c.last_message_at,
+    coalesce(string_agg(DISTINCT other_profile.display_name, ', '), c.title, 'Conversation') AS other_display_name,
+    min(other_profile.avatar_url) AS other_avatar_url
+  FROM public.conversations c
+  JOIN public.conversation_members mine
+    ON mine.conversation_id = c.id AND mine.user_id = auth.uid()
+  LEFT JOIN public.conversation_members other_member
+    ON other_member.conversation_id = c.id AND other_member.user_id <> auth.uid()
+  LEFT JOIN public.profiles other_profile
+    ON other_profile.id = other_member.user_id
+    AND other_profile.account_status = 'active'
+    AND other_profile.college_id = app_private.current_college_id()
+  WHERE app_private.is_conversation_member(c.id)
+  GROUP BY c.id, c.type, c.title, c.last_message_at
+  ORDER BY c.last_message_at DESC NULLS LAST, c.created_at DESC;
+END;
+$;
+
 -- A block disables access to an existing direct conversation in both directions.
 CREATE OR REPLACE FUNCTION app_private.is_conversation_member(p_conversation_id uuid)
 RETURNS boolean
