@@ -7,7 +7,7 @@ import {
   BookOpen,
   CalendarDays,
   CheckCircle2,
-  CircleHelp,
+  HelpCircle,
   Compass,
   FileSearch,
   GraduationCap,
