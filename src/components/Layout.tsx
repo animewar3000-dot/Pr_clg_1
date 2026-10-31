@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import {
-  ArrowUpRight, Bell, BookOpen, Bot, CalendarDays, ChevronLeft,
+  ArrowUpRight, Bell, BookOpen, Bot, CalendarDays, ChevronLeft, ClipboardList,
   ChevronRight, Clock3, Command, GraduationCap,
   Heart, LayoutDashboard, LogOut, Menu, MessageCircle, MessageSquare,
   Plus, Search, ShieldCheck, ShoppingBag, Users, Wrench, X,
@@ -34,6 +34,7 @@ const navigation: NavGroup[] = [
   { label: 'ACADEMICS', items: [
     { name: 'Resource library', href: '/resources', icon: BookOpen },
     { name: 'Timetable', href: '/timetable', icon: Clock3 },
+    { name: 'Assignments', href: '/assignments', icon: ClipboardList },
   ] },
   { label: 'CAMPUS LIFE', items: [
     { name: 'Announcements', href: '/announcements', icon: Bell },
@@ -344,7 +345,7 @@ function SidebarAccount({ collapsed = false, userLabel, campusId, onSignOut }: {
         {!collapsed && <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-white">{userLabel}</p><p className="truncate text-[10px] text-white/45">{campusId || 'Campus member'}</p></div>}
         <button type="button" onClick={onSignOut} title="Sign out" aria-label="Sign out" className="rounded-lg p-2 text-white/55 transition hover:bg-white/10 hover:text-white"><LogOut size={16} /></button>
       </div>
-      {!collapsed && <p className="mt-3 px-2 text-[9px] font-bold tracking-widest text-white/30">CAMPUSIQ · PRIVATE CAMPUS SPACE</p>}
+      {!collapsed && <p className="mt-3 px-2 text-[9px] font-bold tracking-widest text-white/30">CAMPOS · PRIVATE CAMPUS SPACE</p>}
     </div>
   );
 }
