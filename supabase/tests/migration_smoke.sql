@@ -9,11 +9,12 @@ VALUES ('CampOS Test College', 'CAMPTEST', 'campus.example.test');
 
 INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data) VALUES
 ('00000000-0000-4000-8000-000000000001', 'admin@campus.example.test', now(), '{"display_name":"Test Admin","college_code":"CAMPTEST"}'),
-('00000000-0000-4000-8000-000000000002', 'student@campus.example.test', now(), '{"display_name":"Test Student","college_code":"CAMPTEST"}');
+('00000000-0000-4000-8000-000000000002', 'student@campus.example.test', now(), '{"display_name":"Test Student","college_code":"CAMPTEST"}'),
+('00000000-0000-4000-8000-000000000003', 'unverified@campus.example.test', NULL, '{"display_name":"Unverified Student","college_code":"CAMPTEST"}');
 
 DO $$
 BEGIN
-  IF (SELECT count(*) FROM public.profiles) <> 2 THEN
+  IF (SELECT count(*) FROM public.profiles) <> 3 THEN
     RAISE EXCEPTION 'Auth signup trigger did not create both profiles';
   END IF;
   IF EXISTS (SELECT 1 FROM public.profiles WHERE campus_id IS NULL OR account_status <> 'pending_verification') THEN
@@ -46,9 +47,16 @@ BEGIN
     RAISE EXCEPTION 'Campus directory exposed a pending student';
   END IF;
 
-  IF (SELECT count(*) FROM public.list_pending_campus_users()) <> 1 THEN
+  IF (SELECT count(*) FROM public.list_pending_campus_users()) <> 2 THEN
     RAISE EXCEPTION 'Admin verification queue did not return the pending student';
   END IF;
+
+  BEGIN
+    PERFORM public.approve_campus_user('00000000-0000-4000-8000-000000000003');
+    RAISE EXCEPTION USING ERRCODE = 'P0002', MESSAGE = 'Unverified email must not be approved';
+  EXCEPTION WHEN SQLSTATE 'P0001' THEN
+    NULL;
+  END;
 
   IF NOT public.approve_campus_user('00000000-0000-4000-8000-000000000002') THEN
     RAISE EXCEPTION 'Admin approval RPC did not approve the student';
