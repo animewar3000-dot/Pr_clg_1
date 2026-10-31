@@ -987,3 +987,74 @@ $$;
 REVOKE ALL ON FUNCTION public.create_campus_room(text, text, text, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.create_campus_room(text, text, text, text) TO authenticated;
 
+
+
+-- Server-generated public ticket references and initial ticket categories.
+CREATE OR REPLACE FUNCTION public.generate_ticket_public_id()
+RETURNS text
+LANGUAGE sql
+VOLATILE
+AS $$
+  SELECT 'CAMP-' || upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 10));
+$$;
+
+ALTER TABLE public.tickets
+  ALTER COLUMN public_id SET DEFAULT public.generate_ticket_public_id();
+
+CREATE OR REPLACE FUNCTION public.seed_college_ticket_categories()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  INSERT INTO public.ticket_categories (college_id, name, description)
+  SELECT NEW.id, category.name, category.description
+  FROM (VALUES
+    ('Classroom maintenance', 'Furniture, doors, boards and classroom equipment'),
+    ('Electrical', 'Lighting, fans, power outlets and electrical faults'),
+    ('Plumbing', 'Water supply, washrooms and plumbing issues'),
+    ('Wi-Fi and networking', 'Campus internet, Wi-Fi and network access'),
+    ('Computer labs', 'Lab computers, software and peripherals'),
+    ('Library', 'Library facilities, access and equipment'),
+    ('Cleanliness', 'Cleaning, waste and sanitation concerns'),
+    ('General support', 'Other campus support requests')
+  ) AS category(name, description)
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.ticket_categories existing
+    WHERE existing.college_id = NEW.id AND existing.name = category.name
+  );
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS seed_ticket_categories_after_college_insert ON public.colleges;
+CREATE TRIGGER seed_ticket_categories_after_college_insert
+AFTER INSERT ON public.colleges
+FOR EACH ROW EXECUTE FUNCTION public.seed_college_ticket_categories();
+
+DO $$
+DECLARE
+  college_row record;
+BEGIN
+  FOR college_row IN SELECT id FROM public.colleges LOOP
+    INSERT INTO public.ticket_categories (college_id, name, description)
+    SELECT college_row.id, category.name, category.description
+    FROM (VALUES
+      ('Classroom maintenance', 'Furniture, doors, boards and classroom equipment'),
+      ('Electrical', 'Lighting, fans, power outlets and electrical faults'),
+      ('Plumbing', 'Water supply, washrooms and plumbing issues'),
+      ('Wi-Fi and networking', 'Campus internet, Wi-Fi and network access'),
+      ('Computer labs', 'Lab computers, software and peripherals'),
+      ('Library', 'Library facilities, access and equipment'),
+      ('Cleanliness', 'Cleaning, waste and sanitation concerns'),
+      ('General support', 'Other campus support requests')
+    ) AS category(name, description)
+    WHERE NOT EXISTS (
+      SELECT 1 FROM public.ticket_categories existing
+      WHERE existing.college_id = college_row.id AND existing.name = category.name
+    );
+  END LOOP;
+END;
+$$;
+
