@@ -11,6 +11,7 @@ interface AuthState {
   roles: UserRole[];
   accountStatus: AccountStatus;
   isLoading: boolean;
+  isProfileLoading: boolean;
   isConfigured: boolean;
   error: string | null;
 }
@@ -36,6 +37,98 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     roles: [],
     accountStatus: 'pending_verification',
     isLoading: true,
+    isProfileLoading: false,
+    isConfigured: isSupabaseConfigured(),
+    error: null,
+  });
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    const supabase = getSupabase();
+    setState(prev => ({ ...prev, isProfileLoading: true, error: null }));
+    if (!supabase) {
+      setState(prev => ({ ...prev, isProfileLoading: false, isConfigured: false }));
+      return;
+    }
+
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*, role_assignments(role)')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        setState(prev => ({
+          ...prev,
+          profile: null,
+          roles: [],
+          accountStatus: 'pending_verification',
+          isProfileLoading: false,
+          error: profileError.code === 'PGRST116'
+            ? 'Your campus profile has not been provisioned yet. Contact your college administrator.'
+            : profileError.message,
+        }));
+        return;
+      }
+
+      const roles = (profile?.role_assignments || []).map((ra: { role: UserRole }) => ra.role);
+      setState(prev => ({
+        ...prev,
+        profile: profile as Profile,
+        roles,
+        accountStatus: profile.account_status as AccountStatus,
+        isProfileLoading: false,
+        error: null,
+      }));
+    } catch (err) {
+      setState(prev => ({
+        ...prev,
+        profile: null,
+        roles: [],
+        isProfileLoading: false,
+        error: err instanceof Error ? err.message : 'Could not load your campus profile.',
+      }));
+    }
+  }, []);eact, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { getSupabase } from '../lib/supabase';
+import { isSupabaseConfigured } from '../lib/config';
+import type { Profile, UserRole, AccountStatus } from '../lib/types';
+
+interface AuthState {
+  user: User | null;
+  profile: Profile | null;
+  session: Session | null;
+  roles: UserRole[];
+  accountStatus: AccountStatus;
+  isLoading: boolean;
+  isProfileLoading: boolean;
+  isConfigured: boolean;
+  error: string | null;
+}
+
+interface AuthContextType extends AuthState {
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string, collegeCode: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  hasRole: (role: UserRole) => boolean;
+  hasAnyRole: (roles: UserRole[]) => boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    profile: null,
+    session: null,
+    roles: [],
+    accountStatus: 'pending_verification',
+    isLoading: true,
+    isProfileLoading: false,
     isConfigured: isSupabaseConfigured(),
     error: null,
   });
@@ -102,7 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           fetchProfile(session.user.id);
         } else {
-          setState(prev => ({ ...prev, profile: null, roles: [] }));
+          setState(prev => ({ ...prev, profile: null, roles: [], isProfileLoading: false, accountStatus: 'pending_verification' }));
         }
       }
     );
@@ -144,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    setState(prev => ({ ...prev, profile: null, roles: [] }));
+    setState(prev => ({ ...prev, profile: null, roles: [], isProfileLoading: false, accountStatus: 'pending_verification' }));
   };
 
   const resetPassword = async (email: string) => {
