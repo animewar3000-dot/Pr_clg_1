@@ -4,7 +4,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowUpRight, Bell, BookOpen, Bot, CalendarDays, ChevronLeft,
-  ChevronRight, Clock3, Command, GraduationationCap,
+  ChevronRight, Clock3, Command, GraduationCap,
   Heart, LayoutDashboard, LogOut, Menu, MessageCircle, MessageSquare,
   Plus, Search, ShieldCheck, ShoppingBag, Users, Wrench, X,
 } from 'lucide-react';
