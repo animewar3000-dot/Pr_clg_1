@@ -228,7 +228,7 @@ export function LandingPage() {
       <section id="faq" className="scroll-mt-24 bg-white py-20 sm:py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[.7fr_1.3fr]">
           <motion.div {...revealProps}>
-            <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.18em] text-[#386BE8]"><CircleHelp size={16} /> FAQ</p>
+            <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.18em] text-[#386BE8]"><HelpCircle size={16} /> FAQ</p>
             <h2 className="mt-4 text-4xl font-black tracking-[-.04em] sm:text-5xl">Good to know.</h2>
             <p className="mt-5 max-w-sm leading-7 text-slate-600">A few things about campus access, privacy and how CampusIQ is meant to work.</p>
           </motion.div>
