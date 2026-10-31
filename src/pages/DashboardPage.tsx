@@ -161,7 +161,7 @@ export function DashboardPage() {
             </div>
             {profile?.account_status && profile.account_status !== 'active' && (
               <div className="mt-5 inline-flex max-w-xl items-start gap-2 rounded-xl border border-[#F5A82E]/30 bg-[#F5A82E]/10 px-4 py-3 text-xs leading-5 text-[#FFE2A7]">
-                <CircleAlert size={16} className="mt-0.5 shrink-0" />
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
                 Account status: <strong>{profile.account_status.replace(/_/g, ' ')}</strong>. Some campus features may remain restricted until verification is complete.
               </div>
             )}
