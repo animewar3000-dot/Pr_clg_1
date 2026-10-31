@@ -318,7 +318,7 @@ RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, app_private, pg_temp
-AS $
+AS $$
 DECLARE
   v_my_college_id uuid;
   v_other_college_id uuid;
@@ -373,7 +373,7 @@ BEGIN
 
   RETURN v_conversation_id;
 END;
-$;
+$$;
 
 REVOKE ALL ON FUNCTION public.create_direct_conversation(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.create_direct_conversation(uuid) TO authenticated;
@@ -889,7 +889,7 @@ LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
 SET search_path = public, app_private, pg_temp
-AS $
+AS $$
 BEGIN
   IF auth.uid() IS NULL OR NOT app_private.is_active_college_member(app_private.current_college_id()) THEN
     RAISE EXCEPTION 'An active campus account is required';
@@ -916,7 +916,7 @@ BEGIN
   GROUP BY c.id, c.type, c.title, c.last_message_at
   ORDER BY c.last_message_at DESC NULLS LAST, c.created_at DESC;
 END;
-$;
+$$;
 
 -- A block disables access to an existing direct conversation in both directions.
 CREATE OR REPLACE FUNCTION app_private.is_conversation_member(p_conversation_id uuid)
