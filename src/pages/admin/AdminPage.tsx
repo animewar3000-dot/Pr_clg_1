@@ -8,6 +8,7 @@ type PendingCampusUser = {
   display_name: string;
   email: string;
   campus_id: string | null;
+  email_verified: boolean;
   created_at: string;
 };
 
@@ -96,17 +97,17 @@ export function AdminPage() {
                   <p className="truncate font-extrabold text-[#172B4D]">{candidate.display_name}</p>
                   <p className="truncate text-sm text-slate-500">{candidate.email}</p>
                   <p className="mt-1 text-[11px] font-semibold text-slate-400">
-                    {candidate.campus_id || 'Campus ID pending'} · Requested {new Date(candidate.created_at).toLocaleDateString()}
+                    {candidate.campus_id || 'Campus ID pending'} · {candidate.email_verified ? 'Email verified' : 'Email verification pending'} · Requested {new Date(candidate.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 {canApprove ? (
                   <button
                     type="button"
-                    disabled={approveMutation.isPending}
+                    disabled={approveMutation.isPending || !candidate.email_verified}
                     onClick={() => approveMutation.mutate(candidate.id)}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#172B4D] px-4 text-sm font-extrabold text-white transition hover:bg-[#386BE8] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <CheckCircle2 size={16} /> Approve account
+                    <CheckCircle2 size={16} /> {candidate.email_verified ? 'Approve account' : 'Await email verification'}
                   </button>
                 ) : (
                   <span className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-500">View only</span>
