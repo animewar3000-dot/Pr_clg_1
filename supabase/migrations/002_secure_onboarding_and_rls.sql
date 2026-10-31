@@ -556,3 +556,53 @@ WITH CHECK (reporter_id = auth.uid());
 -- Intentionally no client-side INSERT/UPDATE/DELETE policies for role assignments,
 -- audit logs, account approval, or moderation decisions. Those require trusted admin
 -- workflows or server-side functions and must never be granted by changing client payloads.
+
+
+-- Private Storage buckets. Only the resources bucket has an implemented client workflow
+-- in this release; the other buckets are provisioned private and remain inaccessible
+-- until their feature-specific policies are added.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES
+  ('resources', 'resources', false, 20971520, ARRAY[
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'image/jpeg',
+    'image/png'
+  ]),
+  ('avatars', 'avatars', false, 5242880, ARRAY['image/jpeg','image/png','image/webp']),
+  ('item-images', 'item-images', false, 10485760, ARRAY['image/jpeg','image/png','image/webp']),
+  ('listings', 'listings', false, 10485760, ARRAY['image/jpeg','image/png','image/webp']),
+  ('ticket-attachments', 'ticket-attachments', false, 20971520, ARRAY['application/pdf','image/jpeg','image/png'])
+ON CONFLICT (id) DO UPDATE
+SET public = false,
+    file_size_limit = EXCLUDED.file_size_limit,
+    allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+CREATE POLICY resources_storage_read_college ON storage.objects
+FOR SELECT TO authenticated
+USING (
+  bucket_id = 'resources'
+  AND split_part(name, '/', 1) = app_private.current_college_id()::text
+  AND app_private.is_active_college_member(app_private.current_college_id())
+);
+
+CREATE POLICY resources_storage_upload_own ON storage.objects
+FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'resources'
+  AND split_part(name, '/', 1) = app_private.current_college_id()::text
+  AND split_part(name, '/', 2) = auth.uid()::text
+  AND app_private.is_active_college_member(app_private.current_college_id())
+);
+
+CREATE POLICY resources_storage_delete_own ON storage.objects
+FOR DELETE TO authenticated
+USING (
+  bucket_id = 'resources'
+  AND split_part(name, '/', 1) = app_private.current_college_id()::text
+  AND split_part(name, '/', 2) = auth.uid()::text
+);
+
