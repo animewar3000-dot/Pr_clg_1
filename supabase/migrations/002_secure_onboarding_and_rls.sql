@@ -757,7 +757,7 @@ DECLARE
   v_query text;
 BEGIN
   v_college_id := app_private.current_college_id();
-  v_query := trim(coalesce(p_query, ''));
+  v_query := left(trim(coalesce(p_query, '')), 80);
 
   IF v_query = '' OR char_length(v_query) < 2 THEN
     RETURN;
