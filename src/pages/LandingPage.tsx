@@ -20,6 +20,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { BrandMark } from '../components/BrandMark';
 
 const features = [
   { icon: Users, number: '01', title: 'Find your people', description: 'Section-wise rooms, subject spaces, private messages and study groups keep conversations close to the work.' },
@@ -27,12 +28,12 @@ const features = [
   { icon: Search, number: '03', title: 'Lost & Found', description: 'Report a lost item, share something you found and follow a protected claim process.' },
   { icon: Wrench, number: '04', title: 'Campus request desk', description: 'Raise a facilities issue and follow its status through a timestamped service workflow.' },
   { icon: CalendarDays, number: '05', title: 'Campus life, connected', description: 'Discover official announcements, events, clubs, permitted listings and academic schedules.' },
-  { icon: Sparkles, number: '06', title: 'CampusIQ assistant', description: 'Ask questions against approved campus documents, with source references and permission-aware retrieval.' },
+  { icon: Sparkles, number: '06', title: 'CampOS assistant', description: 'Ask questions against approved campus documents, with source references and permission-aware retrieval.' },
 ];
 
 const faqs = [
-  { question: 'Who can use CampusIQ?', answer: 'CampusIQ is designed for verified students, faculty, administrators and authorized campus support staff. Access depends on the institution’s registration and approval process.' },
-  { question: 'How do I get my CampusIQ ID?', answer: 'Create an account using the college-approved identity process. Your unique CampusIQ ID is assigned by the platform after the relevant account checks.' },
+  { question: 'Who can use CampOS?', answer: 'CampOS is designed for verified students, faculty, administrators and authorized campus support staff. Access depends on the institution’s registration and approval process.' },
+  { question: 'How do I get my CampOS ID?', answer: 'Create an account using the college-approved identity process. Your unique CampOS ID is assigned by the platform after the relevant account checks.' },
   { question: 'Are private messages visible to everyone?', answer: 'No. Private conversations are intended for their authorized participants. Access controls must be enforced by the backend, not just hidden in the interface.' },
   { question: 'Does the AI assistant make up college policies?', answer: 'It should answer from documents the signed-in user is allowed to access, cite its sources and say when the approved information is not available.' },
 ];
@@ -58,9 +59,8 @@ export function LandingPage() {
     <main className="min-h-screen overflow-hidden bg-[#F8F5EC] text-[#13171F]">
       <header className="sticky top-0 z-40 border-b border-[#172B4D]/10 bg-[#F8F5EC]/95 backdrop-blur">
         <nav aria-label="Main navigation" className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8">
-          <Link to="/" className="flex items-center gap-3" aria-label="CampusIQ home">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#172B4D] font-black text-white">C</span>
-            <span className="text-xl font-extrabold tracking-tight text-[#172B4D]">CampusIQ</span>
+          <Link to="/" className="flex items-center gap-3" aria-label="CampOS home">
+            <BrandMark size="md" />
           </Link>
           <div className="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
             <a href="#features" className="transition hover:text-[#386BE8]">Platform</a>
@@ -94,7 +94,7 @@ export function LandingPage() {
               Get started <ArrowRight size={18} aria-hidden="true" />
             </Link>
             <a href="#features" className="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl border border-[#172B4D]/15 bg-white px-7 text-base font-extrabold text-[#172B4D] transition hover:-translate-y-1 hover:border-[#386BE8]/40">
-              Explore CampusIQ <Compass size={18} aria-hidden="true" />
+              Explore CampOS <Compass size={18} aria-hidden="true" />
             </a>
           </motion.div>
           <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold tracking-wide text-slate-500">
@@ -122,8 +122,7 @@ export function LandingPage() {
             <div className="relative mt-8 rounded-2xl border-[2px] border-[#13171F] bg-[#F8F5EC] p-4">
               <div className="flex items-center justify-between border-b border-[#13171F]/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#386BE8] text-xs font-black text-white">C</span>
-                  <span className="text-sm font-extrabold text-[#172B4D]">CampusIQ preview</span>
+                  <BrandMark size="sm" />
                 </div>
                 <span className="rounded-full bg-[#DCE6FF] px-3 py-1 text-[10px] font-black text-[#2859CB]">CONCEPT VIEW</span>
               </div>
@@ -230,7 +229,7 @@ export function LandingPage() {
           <motion.div {...revealProps}>
             <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.18em] text-[#386BE8]"><HelpCircle size={16} /> FAQ</p>
             <h2 className="mt-4 text-4xl font-black tracking-[-.04em] sm:text-5xl">Good to know.</h2>
-            <p className="mt-5 max-w-sm leading-7 text-slate-600">A few things about campus access, privacy and how CampusIQ is meant to work.</p>
+            <p className="mt-5 max-w-sm leading-7 text-slate-600">A few things about campus access, privacy and how CampOS is meant to work.</p>
           </motion.div>
           <div className="divide-y divide-[#172B4D]/10 border-y border-[#172B4D]/10">
             {faqs.map((faq, index) => {
@@ -258,9 +257,9 @@ export function LandingPage() {
 
       <footer className="bg-[#13171F] px-5 py-10 text-white/70 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 sm:flex-row sm:items-center">
-          <div><div className="flex items-center gap-3 text-lg font-black text-white"><span className="grid h-9 w-9 place-items-center rounded-lg bg-[#386BE8] text-white">C</span> CampusIQ</div><p className="mt-2 text-sm">Your campus. Connected.</p></div>
+          <div><div className="flex items-center gap-3 text-lg font-black text-white"><span className="grid h-9 w-9 place-items-center rounded-lg bg-[#386BE8] text-white">C</span> CampOS</div><p className="mt-2 text-sm">Your campus. Connected.</p></div>
           <div className="flex flex-wrap gap-6 text-sm font-semibold"><a href="#features" className="hover:text-white">Platform</a><a href="#trust" className="hover:text-white">Trust & safety</a><a href="#faq" className="hover:text-white">FAQs</a><Link to="/auth/login" className="hover:text-white">Log in</Link></div>
-          <p className="text-xs">© {new Date().getFullYear()} CampusIQ</p>
+          <p className="text-xs">© {new Date().getFullYear()} CampOS</p>
         </div>
       </footer>
     </main>
