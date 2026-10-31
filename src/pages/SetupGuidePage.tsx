@@ -4,7 +4,7 @@ import { BrandMark } from '../components/BrandMark';
 const steps = [
   { title: 'Create or open your Supabase project', description: 'Use the college-owned Supabase project. In Project Settings → API, copy the Project URL and the anon/public key (or publishable key supported by your client setup).' },
   { title: 'Add the frontend environment variables', description: 'In Netlify → Site configuration → Environment variables, add both variables for the deploy contexts you use (production, deploy previews and branch deploys). Then trigger a fresh deploy.' },
-  { title: 'Apply the database migrations', description: 'Run the checked-in SQL migrations in order using the Supabase CLI or SQL Editor. Confirm that required tables and Row Level Security policies exist before inviting users.' },
+  { title: 'Apply the database migrations', description: 'Run `001_initial_schema.sql` and then `002_secure_onboarding_and_rls.sql` in your Supabase SQL Editor. Migration 002 adds signup provisioning, RLS, private resources storage and campus workflow RPCs.' },
   { title: 'Configure authentication and storage', description: 'Enable Email authentication and set the allowed redirect URLs to your Netlify domain. Migration 002 creates private buckets; only the academic resources bucket has complete access policies in this release.' },
   { title: 'Register the college and first administrator', description: 'Follow supabase/BOOTSTRAP_ADMIN.md to insert the verified college code and email domain, register the first administrator, and grant the initial college_admin role from the SQL Editor.' },
 ];
