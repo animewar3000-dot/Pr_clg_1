@@ -39,8 +39,8 @@ DECLARE
   v_room_id uuid;
   v_conversation_id uuid;
 BEGIN
-  IF (SELECT count(*) FROM public.search_campus_directory('Student')) <> 1 THEN
-    RAISE EXCEPTION 'Campus directory RPC returned unexpected results';
+  IF (SELECT count(*) FROM public.search_campus_directory('Student')) <> 0 THEN
+    RAISE EXCEPTION 'Campus directory exposed a pending student';
   END IF;
 
   IF (SELECT count(*) FROM public.list_pending_campus_users()) <> 1 THEN
@@ -53,6 +53,10 @@ BEGIN
 
   IF NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000002' AND account_status = 'active') THEN
     RAISE EXCEPTION 'Approved student is not active';
+  END IF;
+
+  IF (SELECT count(*) FROM public.search_campus_directory('Student')) <> 1 THEN
+    RAISE EXCEPTION 'Campus directory did not return the approved student';
   END IF;
 
   v_room_id := public.create_campus_room('Test Study Room', 'Migration smoke test', 'study_group', 'public');
