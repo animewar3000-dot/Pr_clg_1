@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema } from '../../lib/validations';
 import { useAuth } from '../../contexts/AuthContext';
+import { AuthLayout, AuthSubmitLabel } from '../../components/AuthLayout';
 import type { z } from 'zod';
 
 type RegisterFormData = z.infer<typeof registerSchema>;
+const fieldClass = "mt-2 w-full rounded-xl border border-[#172B4D]/15 bg-white px-4 py-3 text-sm text-[#13171F] outline-none transition placeholder:text-slate-400 focus:border-[#386BE8] focus:ring-4 focus:ring-[#386BE8]/10";
 
 export function RegisterPage() {
   const { signUp, error: authError } = useAuth();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -21,10 +22,10 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.displayName);
+      await signUp(data.email, data.password, data.displayName, data.collegeCode);
       setSuccess(true);
     } catch {
-      // Error handled by context
+      // Authentication errors are displayed by AuthContext.
     } finally {
       setIsLoading(false);
     }
@@ -32,112 +33,46 @@ export function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="max-w-md w-full text-center">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <div className="text-green-500 text-5xl mb-4">✓</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Registration Submitted</h2>
-            <p className="text-gray-600 mb-4">
-              Your account has been created. You will receive an email to verify your address.
-              After verification, your account will be reviewed by the administration before activation.
-            </p>
-            <Link to="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Go to login
-            </Link>
-          </div>
+      <AuthLayout eyebrow="REGISTRATION RECEIVED" title="Your next chapter starts soon." description="Your account request has been submitted. Follow the verification instructions sent to your college email.">
+        <div className="rounded-2xl border border-[#14A89C]/25 bg-[#E6F5F1] p-5">
+          <div className="text-3xl font-black text-[#16846F]">✓</div>
+          <h2 className="mt-3 text-lg font-extrabold text-[#172B4D]">Check your college inbox</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Email verification and the institution’s approval process must be completed before protected campus features become available.</p>
         </div>
-      </div>
+        <Link to="/auth/login" className="mt-6 inline-flex font-extrabold text-[#386BE8] hover:underline">Go to sign in →</Link>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600">CampusIQ</h1>
-          <p className="mt-2 text-gray-600">Create your campus account</p>
+    <AuthLayout eyebrow="CREATE YOUR CAMPUS IDENTITY" title="Start with your details." description="Use the details your college can verify. Your unique CampusIQ ID is generated after approval.">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {authError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
+        <div>
+          <label htmlFor="displayName" className="text-sm font-bold text-[#172B4D]">Full name</label>
+          <input id="displayName" autoComplete="name" {...register('displayName')} className={fieldClass} placeholder="Your name as on college records" aria-invalid={Boolean(errors.displayName)} />
+          {errors.displayName && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.displayName.message}</p>}
         </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {authError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-                {authError}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                id="displayName"
-                type="text"
-                {...register('displayName')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Your full name"
-              />
-              {errors.displayName && <p className="mt-1 text-sm text-red-600">{errors.displayName.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                College Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                {...register('email')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="you@college.edu"
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="collegeCode" className="block text-sm font-medium text-gray-700 mb-1">
-                College Code
-              </label>
-              <input
-                id="collegeCode"
-                type="text"
-                {...register('collegeCode')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., MIT, STAN, etc."
-              />
-              {errors.collegeCode && <p className="mt-1 text-sm text-red-600">{errors.collegeCode.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                {...register('password')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
-            >
-              {isLoading ? 'Creating account...' : 'Create account'}
-            </button>
-          </form>
-
-          <p className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign in
-            </Link>
-          </p>
+        <div>
+          <label htmlFor="email" className="text-sm font-bold text-[#172B4D]">College email</label>
+          <input id="email" type="email" autoComplete="email" {...register('email')} className={fieldClass} placeholder="you@college.edu" aria-invalid={Boolean(errors.email)} />
+          {errors.email && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.email.message}</p>}
         </div>
-      </div>
-    </div>
+        <div>
+          <label htmlFor="collegeCode" className="text-sm font-bold text-[#172B4D]">College code</label>
+          <input id="collegeCode" autoComplete="off" {...register('collegeCode')} className={fieldClass} placeholder="Your official college code" aria-invalid={Boolean(errors.collegeCode)} />
+          {errors.collegeCode && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.collegeCode.message}</p>}
+        </div>
+        <div>
+          <label htmlFor="password" className="text-sm font-bold text-[#172B4D]">Password</label>
+          <input id="password" type="password" autoComplete="new-password" {...register('password')} className={fieldClass} placeholder="At least 8 characters" aria-invalid={Boolean(errors.password)} />
+          {errors.password && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.password.message}</p>}
+        </div>
+        <button type="submit" disabled={isLoading} className="inline-flex min-h-13 w-full items-center justify-center rounded-xl bg-[#386BE8] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] disabled:cursor-not-allowed disabled:opacity-60">
+          <AuthSubmitLabel loading={isLoading}>Create account</AuthSubmitLabel>
+        </button>
+        <p className="text-center text-sm text-slate-600">Already registered? <Link to="/auth/login" className="font-extrabold text-[#386BE8] hover:underline">Sign in</Link></p>
+      </form>
+    </AuthLayout>
   );
 }

@@ -5,7 +5,7 @@ export const config = {
   },
   app: {
     url: import.meta.env.VITE_APP_URL || 'http://localhost:3000',
-    name: import.meta.env.VITE_APP_NAME || 'CampusIQ',
+    name: import.meta.env.VITE_APP_NAME || 'CampOS',
   },
   ai: {
     provider: import.meta.env.VITE_AI_PROVIDER || '',

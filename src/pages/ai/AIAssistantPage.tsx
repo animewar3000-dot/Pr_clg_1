@@ -5,7 +5,7 @@ import type { AIChatMessage } from '../../lib/types';
 
 export function AIAssistantPage() {
   const [messages, setMessages] = useState<AIChatMessage[]>([
-    { role: 'assistant', content: 'Hello! I\'m the CampusIQ AI Assistant. I can help you with academic questions, campus information, finding resources, and more. How can I help you today?' }
+    { role: 'assistant', content: 'Hello! I\'m the CampOS AI Assistant. I can help you with academic questions, campus information, finding resources, and more. How can I help you today?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
