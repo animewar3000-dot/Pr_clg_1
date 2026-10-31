@@ -606,3 +606,55 @@ USING (
   AND split_part(name, '/', 2) = auth.uid()::text
 );
 
+
+
+-- Enforce resource visibility in both Postgres queries and signed Storage URL creation.
+CREATE OR REPLACE FUNCTION app_private.can_read_resource(p_resource_id uuid)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.resources r
+    JOIN public.profiles viewer ON viewer.id = auth.uid()
+    LEFT JOIN public.subjects subject ON subject.id = r.subject_id
+    WHERE r.id = p_resource_id
+      AND r.college_id = viewer.college_id
+      AND viewer.account_status = 'active'
+      AND r.status = 'approved'
+      AND (
+        r.visibility = 'public'
+        OR (r.visibility = 'department' AND viewer.department_id = subject.department_id)
+        OR (r.visibility = 'subject' AND viewer.semester_id = subject.semester_id)
+        OR (r.visibility = 'private' AND r.uploaded_by = viewer.id)
+      )
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION app_private.can_read_resource_file(p_object_path text)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.resources r
+    WHERE r.file_url = p_object_path
+      AND app_private.can_read_resource(r.id)
+  );
+$$;
+
+REVOKE ALL ON FUNCTION app_private.can_read_resource(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION app_private.can_read_resource_file(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app_private.can_read_resource(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_private.can_read_resource_file(text) TO authenticated;
+
+DROP POLICY IF EXISTS resources_read_approved_college ON public.resources;
+CREATE POLICY resources_read_by_visibility ON public.resources FOR SELECT TO authenticated
+USING (app_private.can_read_resource(id));
+
+DROP POLICY IF EXISTS resources_storage_read_college ON storage.objects;
+CREATE POLICY resources_storage_read_by_visibility ON storage.objects
+FOR SELECT TO authenticated
+USING (bucket_id = 'resources' AND app_private.can_read_resource_file(name));
+
