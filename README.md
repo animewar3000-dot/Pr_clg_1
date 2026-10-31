@@ -98,7 +98,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 3. **Set up the database:**
-Run every migration in `supabase/migrations/` in numeric order in your Supabase SQL Editor. Start with `001_initial_schema.sql`, then `002_secure_onboarding_and_rls.sql`. The second migration adds the auth-user profile trigger and stricter RLS policies. Registration will reject users until a college row exists with a matching college code and email domain.
+Run every migration in `supabase/migrations/` in numeric order in your Supabase SQL Editor. Start with `001_initial_schema.sql`, then `002_secure_onboarding_and_rls.sql`. The second migration adds the auth-user profile trigger and stricter RLS policies. Registration will reject users until a college row exists with a matching college code and email domain. Follow `supabase/BOOTSTRAP_ADMIN.md` to register the first college and securely bootstrap the first college administrator.
 
 4. **Create storage buckets:**
 In Supabase Dashboard → Storage, create these buckets:
