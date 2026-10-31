@@ -19,23 +19,25 @@ export function RoomsPage() {
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
 
-  const { data: rooms, isLoading } = useQuery({
+  const { data: rooms, isLoading, isError: roomsError } = useQuery({
     queryKey: ['rooms', profile?.college_id, search],
     queryFn: async () => {
       if (!supabase || !profile) return [];
       let query = supabase.from('rooms').select('*').eq('college_id', profile.college_id).order('created_at', { ascending: false });
       if (search) query = query.ilike('name', `%${search}%`);
-      const { data } = await query.limit(50);
+      const { data, error } = await query.limit(50);
+      if (error) throw error;
       return (data || []) as Room[];
     },
     enabled: !!supabase && !!profile,
   });
 
-  const { data: myRoomIds } = useQuery({
+  const { data: myRoomIds, isError: membershipsError } = useQuery({
     queryKey: ['room-memberships', user?.id],
     queryFn: async () => {
       if (!supabase || !user) return [];
-      const { data } = await supabase.from('room_members').select('room_id').eq('user_id', user.id);
+      const { data, error } = await supabase.from('room_members').select('room_id').eq('user_id', user.id);
+      if (error) throw error;
       return (data || []).map(d => d.room_id);
     },
     enabled: !!supabase && !!user,
@@ -43,23 +45,21 @@ export function RoomsPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: RoomFormData) => {
-      if (!supabase || !profile || !user) throw new Error('Not configured');
-      const { data: room, error } = await supabase.from('rooms').insert({
-        college_id: profile.college_id,
-        name: data.name,
-        description: data.description,
-        type: data.type,
-        visibility: data.visibility,
-        created_by: user.id,
-      }).select().single();
+      if (!supabase) throw new Error('Supabase is not configured.');
+      const { data: roomId, error } = await supabase.rpc('create_campus_room', {
+        p_name: data.name,
+        p_description: data.description || '',
+        p_type: data.type,
+        p_visibility: data.visibility,
+      });
       if (error) throw error;
-      // Auto-join creator
-      await supabase.from('room_members').insert({ room_id: room.id, user_id: user.id, role: 'admin' });
-      return room;
+      return roomId as string;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rooms'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['rooms'] });
+      await queryClient.invalidateQueries({ queryKey: ['room-memberships'] });
       setShowCreate(false);
+      reset();
     },
   });
 
@@ -69,7 +69,10 @@ export function RoomsPage() {
       const { error } = await supabase.from('room_members').insert({ room_id: roomId, user_id: user.id, role: 'member' });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['room-memberships'] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['room-memberships'] });
+      await queryClient.invalidateQueries({ queryKey: ['rooms'] });
+    },
   });
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<any>({
@@ -139,7 +142,11 @@ export function RoomsPage() {
         />
       </div>
 
-      {isLoading ? (
+      {createMutation.isError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{createMutation.error instanceof Error ? createMutation.error.message : 'Room could not be created.'}</p>}
+      {joinMutation.isError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{joinMutation.error instanceof Error ? joinMutation.error.message : 'Could not join room.'}</p>}
+      {roomsError || membershipsError ? (
+        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Campus rooms could not be loaded. Check your account approval and Supabase policies.</p>
+      ) : isLoading ? (
         <div className="text-center py-8 text-gray-500">Loading rooms...</div>
       ) : !rooms || rooms.length === 0 ? (
         <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
@@ -157,7 +164,7 @@ export function RoomsPage() {
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{room.type.replace(/_/g, ' ')}</span>
                   {!isMember && room.visibility === 'public' && (
-                    <button onClick={() => joinMutation.mutate(room.id)} className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                    <button disabled={joinMutation.isPending} onClick={() => joinMutation.mutate(room.id)} className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50">
                       Join
                     </button>
                   )}
