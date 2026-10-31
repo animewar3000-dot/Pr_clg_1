@@ -25,6 +25,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/admin/AdminPage';
 import { SetupGuidePage } from './pages/SetupGuidePage';
 import { LandingPage } from './pages/LandingPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,7 @@ function AppRoutes() {
       <Route path="/auth/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/auth/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path="/auth/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
       {/* Protected routes */}
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
