@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { isSupabaseConfigured } from './lib/config';
@@ -24,6 +24,7 @@ import { AIAssistantPage } from './pages/ai/AIAssistantPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/admin/AdminPage';
 import { SetupGuidePage } from './pages/SetupGuidePage';
+import { LandingPage } from './pages/LandingPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,13 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, isConfigured } = useAuth();
+  const location = useLocation();
+
+  // Keep the public landing page available even before Supabase is configured.
+  // The actual account flows and all protected modules still require Supabase.
+  if (location.pathname === "/" && !user && (!isConfigured || !isLoading)) {
+    return <LandingPage />;
+  }
 
   if (!isConfigured) {
     return <Navigate to="/setup" replace />;
