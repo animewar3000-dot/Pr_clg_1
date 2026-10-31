@@ -9,6 +9,7 @@ import {
   Plus, Search, ShieldCheck, ShoppingBag, Users, Wrench, X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { BrandMark } from './BrandMark';
 
 interface NavItem {
   name: string;
@@ -45,7 +46,7 @@ const navigation: NavGroup[] = [
     { name: 'Feedback', href: '/feedback', icon: MessageCircle },
   ] },
   { label: 'INTELLIGENCE', items: [
-    { name: 'CampusIQ AI', href: '/ai-assistant', icon: Bot },
+    { name: 'CampOS AI', href: '/ai-assistant', icon: Bot },
   ] },
 ];
 
@@ -142,8 +143,7 @@ export function Layout() {
             >
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#386BE8] text-xl font-black">C</span>
-                  <span className="font-extrabold">CampusIQ</span>
+                  <BrandMark inverse size="sm" />
                 </div>
                 <button type="button" onClick={() => setMobileOpen(false)} className="rounded-lg p-2 text-white/70 hover:bg-white/10 hover:text-white" aria-label="Close navigation"><X size={20} /></button>
               </div>
@@ -161,11 +161,11 @@ export function Layout() {
           </button>
           <div className="min-w-0 flex-1">
             <p className="hidden text-[10px] font-black tracking-[.18em] text-[#386BE8] sm:block">YOUR CAMPUS / CONNECTED</p>
-            <h1 className="truncate text-base font-extrabold text-[#172B4D]">{activeItem?.name || 'CampusIQ'}</h1>
+            <h1 className="truncate text-base font-extrabold text-[#172B4D]">{activeItem?.name || 'CampOS'}</h1>
           </div>
-          <button type="button" onClick={() => setSearchOpen(true)} className="flex h-10 min-w-0 items-center gap-3 rounded-xl border border-[#172B4D]/10 bg-white px-3 text-left text-sm text-slate-500 transition hover:border-[#386BE8]/40 sm:w-[260px] lg:w-[320px]" aria-label="Search CampusIQ pages (Control or Command K)">
+          <button type="button" onClick={() => setSearchOpen(true)} className="flex h-10 min-w-0 items-center gap-3 rounded-xl border border-[#172B4D]/10 bg-white px-3 text-left text-sm text-slate-500 transition hover:border-[#386BE8]/40 sm:w-[260px] lg:w-[320px]" aria-label="Search CampOS pages (Control or Command K)">
             <Search size={16} className="shrink-0" />
-            <span className="flex-1 truncate">Search CampusIQ pages...</span>
+            <span className="flex-1 truncate">Search CampOS pages...</span>
             <kbd className="hidden rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 sm:inline-flex"><Command size={10} /> K</kbd>
           </button>
           <div className="hidden items-center gap-2 sm:flex">
@@ -240,7 +240,7 @@ export function Layout() {
             >
               <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
                 <Search size={19} className="text-[#386BE8]" />
-                <input autoFocus value={searchQuery} onChange={event => setSearchQuery(event.target.value)} placeholder="Find a CampusIQ page..." className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#172B4D] outline-none placeholder:font-normal placeholder:text-slate-400" aria-label="Search CampusIQ pages" />
+                <input autoFocus value={searchQuery} onChange={event => setSearchQuery(event.target.value)} placeholder="Find a CampOS page..." className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#172B4D] outline-none placeholder:font-normal placeholder:text-slate-400" aria-label="Search CampOS pages" />
                 <button type="button" onClick={() => setSearchOpen(false)} className="rounded-md border border-slate-200 px-2 py-1 text-[10px] font-black text-slate-400">ESC</button>
               </div>
               <div className="max-h-[52vh] overflow-y-auto p-2">
@@ -289,8 +289,8 @@ function SidebarContent({
     <div className="flex h-full min-h-0 flex-col">
       <div className={`flex h-[72px] shrink-0 items-center border-b border-white/10 ${collapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#386BE8] text-2xl font-black text-white">C</span>
-          {!collapsed && <div className="min-w-0"><p className="truncate text-base font-black tracking-tight">CampusIQ</p><p className="text-[9px] font-bold tracking-[.16em] text-white/50">YOUR CAMPUS. CONNECTED.</p></div>}
+          <BrandMark inverse compact size="md" />
+          {!collapsed && <div className="min-w-0"><p className="truncate text-base font-black tracking-tight text-white">CampOS</p><p className="text-[9px] font-bold tracking-[.16em] text-white/50">CAMPUS OPERATING SYSTEM</p></div>}
         </div>
         <button type="button" onClick={onCollapse} className={`hidden rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white ${collapsed ? 'lg:hidden' : 'lg:block'}`} aria-label="Collapse sidebar"><ChevronLeft size={17} /></button>
         {collapsed && <button type="button" onClick={onCollapse} className="hidden rounded-lg p-1 text-white/60 hover:bg-white/10 hover:text-white lg:block" aria-label="Expand sidebar"><ChevronRight size={17} /></button>}
@@ -303,7 +303,7 @@ function SidebarContent({
 
 function SidebarNavigation({ collapsed = false, isAdmin, onNavigate }: { collapsed?: boolean; isAdmin: boolean; onNavigate?: () => void }) {
   return (
-    <nav aria-label="CampusIQ navigation" className="min-h-0 flex-1 space-y-5 overflow-y-auto px-3 py-5">
+    <nav aria-label="CampOS navigation" className="min-h-0 flex-1 space-y-5 overflow-y-auto px-3 py-5">
       {navigation.map(group => (
         <div key={group.label}>
           {!collapsed && <p className="mb-2 px-3 text-[9px] font-black tracking-[.18em] text-white/40">{group.label}</p>}
