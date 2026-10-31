@@ -1534,7 +1534,7 @@ DECLARE
   v_college_id uuid;
   v_creator_id uuid;
 BEGIN
-  IF p_grade < 0 OR p_grade > 100 THEN
+  IF p_grade IS NULL OR p_grade < 0 OR p_grade > 100 THEN
     RAISE EXCEPTION 'Grade must be between 0 and 100';
   END IF;
 
