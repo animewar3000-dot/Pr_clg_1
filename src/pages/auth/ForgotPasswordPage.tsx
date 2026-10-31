@@ -1,15 +1,18 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { passwordResetSchema } from '../../lib/validations';
 import { useAuth } from '../../contexts/AuthContext';
-import { useState } from 'react';
+import { AuthLayout, AuthSubmitLabel } from '../../components/AuthLayout';
 import type { z } from 'zod';
 
 type FormData = z.infer<typeof passwordResetSchema>;
+const fieldClass = "mt-2 w-full rounded-xl border border-[#172B4D]/15 bg-white px-4 py-3.5 text-sm text-[#13171F] outline-none transition placeholder:text-slate-400 focus:border-[#386BE8] focus:ring-4 focus:ring-[#386BE8]/10";
 
 export function ForgotPasswordPage() {
   const { resetPassword } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,52 +21,39 @@ export function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
+    setError('');
     try {
       await resetPassword(data.email);
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : 'Unable to request a reset link.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (sent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="max-w-md w-full text-center bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <h2 className="text-xl font-semibold mb-2">Check your email</h2>
-          <p className="text-gray-600">We've sent password reset instructions to your email address.</p>
-          <Link to="/auth/login" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
-            Back to login
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600">CampusIQ</h1>
-          <p className="mt-2 text-gray-600">Reset your password</p>
+    <AuthLayout eyebrow="ACCOUNT RECOVERY" title={sent ? "Check your inbox." : "Let's get you back in."} description={sent ? "If the account can receive recovery email, follow the secure link to choose a new password." : "Enter your college email and we’ll request a secure password reset link."}>
+      {sent ? (
+        <div className="rounded-2xl border border-[#14A89C]/25 bg-[#E6F5F1] p-5">
+          <div className="text-3xl font-black text-[#16846F]">✓</div>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Check your inbox and follow the password reset instructions. You can safely close this page.</p>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">{error}</div>}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-              <input id="email" type="email" {...register('email')} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-            </div>
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium">
-              Send reset link
-            </button>
-          </form>
-          <p className="mt-4 text-center text-sm">
-            <Link to="/auth/login" className="text-blue-600 hover:text-blue-700">Back to login</Link>
-          </p>
-        </div>
-      </div>
-    </div>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+          {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          <div>
+            <label htmlFor="email" className="text-sm font-bold text-[#172B4D]">College email</label>
+            <input id="email" type="email" autoComplete="email" {...register('email')} className={fieldClass} placeholder="you@college.edu" aria-invalid={Boolean(errors.email)} />
+            {errors.email && <p role="alert" className="mt-2 text-xs font-semibold text-red-600">{errors.email.message}</p>}
+          </div>
+          <button type="submit" disabled={isLoading} className="inline-flex min-h-13 w-full items-center justify-center rounded-xl bg-[#386BE8] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] disabled:cursor-not-allowed disabled:opacity-60">
+            <AuthSubmitLabel loading={isLoading}>Send reset link</AuthSubmitLabel>
+          </button>
+        </form>
+      )}
+      <p className="mt-6 text-center text-sm text-slate-600"><Link to="/auth/login" className="font-extrabold text-[#386BE8] hover:underline">Back to sign in</Link></p>
+    </AuthLayout>
   );
 }
