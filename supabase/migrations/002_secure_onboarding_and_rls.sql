@@ -1131,3 +1131,145 @@ $$;
 REVOKE ALL ON FUNCTION public.register_for_campus_event(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.register_for_campus_event(uuid) TO authenticated;
 
+
+
+-- Lost & Found claims: submit and verify ownership through trusted RPCs.
+DROP POLICY IF EXISTS item_claims_create_self ON public.item_claims;
+
+CREATE OR REPLACE FUNCTION public.claim_lost_found_item(p_report_id uuid, p_description text)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_claim_id uuid;
+  v_report public.item_reports%ROWTYPE;
+BEGIN
+  IF auth.uid() IS NULL OR NOT app_private.is_active_college_member(app_private.current_college_id()) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+  IF length(trim(coalesce(p_description, ''))) < 10 OR length(p_description) > 2000 THEN
+    RAISE EXCEPTION 'Please provide at least 10 characters describing why this item belongs to you';
+  END IF;
+
+  SELECT * INTO v_report
+  FROM public.item_reports
+  WHERE id = p_report_id
+    AND college_id = app_private.current_college_id()
+    AND status = 'open'
+  FOR UPDATE;
+
+  IF NOT FOUND OR v_report.reporter_id = auth.uid() THEN
+    RAISE EXCEPTION 'This item is not available to claim';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.item_claims
+    WHERE report_id = p_report_id AND claimant_id = auth.uid()
+      AND status IN ('pending','verified')
+  ) THEN
+    RAISE EXCEPTION 'You already have an active claim for this item';
+  END IF;
+
+  INSERT INTO public.item_claims (report_id, claimant_id, description, status)
+  VALUES (p_report_id, auth.uid(), trim(p_description), 'pending')
+  RETURNING id INTO v_claim_id;
+
+  UPDATE public.item_reports SET status = 'claimed', updated_at = now()
+  WHERE id = p_report_id;
+
+  RETURN v_claim_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.list_my_item_claims()
+RETURNS TABLE (
+  id uuid,
+  report_id uuid,
+  claimant_id uuid,
+  claimant_name text,
+  description text,
+  status text,
+  created_at timestamptz
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+BEGIN
+  IF auth.uid() IS NULL OR NOT app_private.is_active_college_member(app_private.current_college_id()) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT ic.id, ic.report_id, ic.claimant_id, p.display_name, ic.description, ic.status, ic.created_at
+  FROM public.item_claims ic
+  JOIN public.item_reports ir ON ir.id = ic.report_id
+  JOIN public.profiles p ON p.id = ic.claimant_id
+  WHERE ir.reporter_id = auth.uid()
+    AND ir.college_id = app_private.current_college_id()
+  ORDER BY ic.created_at ASC;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.review_item_claim(p_claim_id uuid, p_decision text)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_report_id uuid;
+  v_college_id uuid;
+  v_reporter_id uuid;
+BEGIN
+  IF p_decision NOT IN ('verified','rejected') THEN
+    RAISE EXCEPTION 'Decision must be verified or rejected';
+  END IF;
+
+  SELECT ic.report_id, ir.college_id, ir.reporter_id
+  INTO v_report_id, v_college_id, v_reporter_id
+  FROM public.item_claims ic
+  JOIN public.item_reports ir ON ir.id = ic.report_id
+  WHERE ic.id = p_claim_id
+  FOR UPDATE OF ic, ir;
+
+  IF v_report_id IS NULL OR v_college_id <> app_private.current_college_id()
+     OR NOT app_private.is_active_college_member(v_college_id) THEN
+    RAISE EXCEPTION 'Claim not found in your college';
+  END IF;
+
+  IF v_reporter_id <> auth.uid()
+     AND NOT app_private.has_college_role(v_college_id, ARRAY['department_admin','college_admin','super_admin']) THEN
+    RAISE EXCEPTION 'Only the item reporter or an authorized administrator can review this claim';
+  END IF;
+
+  UPDATE public.item_claims SET status = p_decision
+  WHERE id = p_claim_id AND status = 'pending';
+
+  IF p_decision = 'verified' THEN
+    UPDATE public.item_reports SET status = 'handed_over', updated_at = now()
+    WHERE id = v_report_id;
+    UPDATE public.item_claims SET status = 'rejected'
+    WHERE report_id = v_report_id AND id <> p_claim_id AND status = 'pending';
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM public.item_claims
+    WHERE report_id = v_report_id AND status = 'pending'
+  ) THEN
+    UPDATE public.item_reports SET status = 'open', updated_at = now()
+    WHERE id = v_report_id AND status = 'claimed';
+  END IF;
+
+  RETURN true;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.claim_lost_found_item(uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.list_my_item_claims() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.review_item_claim(uuid, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.claim_lost_found_item(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.list_my_item_claims() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.review_item_claim(uuid, text) TO authenticated;
+
