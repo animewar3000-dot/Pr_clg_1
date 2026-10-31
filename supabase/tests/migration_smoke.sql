@@ -71,6 +71,11 @@ $$;
 
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
-SELECT CASE WHEN count(*) = 1 THEN 'profile RLS isolation passed' ELSE 1 / 0::text END
-FROM public.profiles;
+DO $
+BEGIN
+  IF (SELECT count(*) FROM public.profiles) <> 1 THEN
+    RAISE EXCEPTION 'Profile RLS did not isolate the authenticated user';
+  END IF;
+END;
+$;
 RESET ROLE;
