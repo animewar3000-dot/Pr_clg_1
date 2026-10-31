@@ -658,3 +658,82 @@ CREATE POLICY resources_storage_read_by_visibility ON storage.objects
 FOR SELECT TO authenticated
 USING (bucket_id = 'resources' AND app_private.can_read_resource_file(name));
 
+
+
+-- Admin-only verification queue and approval RPC. The browser never receives
+-- permission to update account_status or role_assignments directly.
+CREATE OR REPLACE FUNCTION public.list_pending_campus_users()
+RETURNS TABLE (
+  id uuid,
+  display_name text,
+  email text,
+  campus_id text,
+  created_at timestamptz
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_college_id uuid;
+BEGIN
+  v_college_id := app_private.current_college_id();
+  IF v_college_id IS NULL OR NOT app_private.has_college_role(
+    v_college_id, ARRAY['department_admin','college_admin','super_admin']
+  ) THEN
+    RAISE EXCEPTION 'Administrative permission required';
+  END IF;
+
+  RETURN QUERY
+  SELECT p.id, p.display_name, p.email, p.campus_id, p.created_at
+  FROM public.profiles p
+  WHERE p.college_id = v_college_id
+    AND p.account_status = 'pending_verification'
+  ORDER BY p.created_at ASC;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.approve_campus_user(p_user_id uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_college_id uuid;
+  v_target_college_id uuid;
+BEGIN
+  v_college_id := app_private.current_college_id();
+  IF v_college_id IS NULL OR NOT app_private.has_college_role(
+    v_college_id, ARRAY['college_admin','super_admin']
+  ) THEN
+    RAISE EXCEPTION 'College administrator permission required';
+  END IF;
+
+  SELECT college_id INTO v_target_college_id
+  FROM public.profiles
+  WHERE id = p_user_id
+    AND account_status = 'pending_verification';
+
+  IF v_target_college_id IS NULL OR v_target_college_id <> v_college_id THEN
+    RAISE EXCEPTION 'Pending user was not found in your college';
+  END IF;
+
+  UPDATE public.profiles
+  SET account_status = 'active', updated_at = now()
+  WHERE id = p_user_id AND college_id = v_college_id
+    AND account_status = 'pending_verification';
+
+  INSERT INTO public.audit_logs (user_id, action, resource_type, resource_id, details)
+  VALUES (auth.uid(), 'user.approved', 'profile', p_user_id, jsonb_build_object('college_id', v_college_id));
+
+  RETURN true;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.list_pending_campus_users() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.approve_campus_user(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.list_pending_campus_users() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.approve_campus_user(uuid) TO authenticated;
+
