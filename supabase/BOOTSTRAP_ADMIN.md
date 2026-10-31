@@ -16,7 +16,7 @@ VALUES (
 ON CONFLICT (code) DO NOTHING;
 ```
 
-The email domain must be the domain students are expected to use, without the @ symbol. Do not use a personal Gmail domain for a real campus deployment.
+The email domain must be the domain students are expected to use, without the @ symbol. If the college does not issue official email accounts, set `email_domain` to `*`; registration will still require email verification and manual administrator approval. In that mode, the administrator must verify each student's college identity before approving access.
 
 ## 2. Apply database migrations
 
