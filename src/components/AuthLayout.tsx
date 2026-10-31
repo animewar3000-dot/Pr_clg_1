@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { BrandMark } from './BrandMark';
 
 interface AuthLayoutProps {
   eyebrow: string;
@@ -20,8 +21,7 @@ export function AuthLayout({ eyebrow, title, description, children }: AuthLayout
           <div className="absolute -right-20 top-20 h-64 w-64 rounded-full bg-[#386BE8]/40 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-[#14A89C]/20 blur-3xl" />
           <Link to="/" className="relative z-10 inline-flex w-fit items-center gap-3 text-lg font-black">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#386BE8] text-2xl">C</span>
-            CampusIQ
+            <BrandMark inverse />
           </Link>
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 22 }}
@@ -51,7 +51,7 @@ export function AuthLayout({ eyebrow, title, description, children }: AuthLayout
         <section className="flex items-center justify-center px-2 py-8 sm:px-8 lg:px-12 xl:px-16">
           <div className="w-full max-w-lg">
             <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition hover:text-[#386BE8]">
-              <ArrowLeft size={16} aria-hidden="true" /> Back to CampusIQ
+              <ArrowLeft size={16} aria-hidden="true" /> Back to CampOS
             </Link>
             <p className="text-xs font-black tracking-[.18em] text-[#386BE8]">{eyebrow}</p>
             <h1 className="mt-4 text-4xl font-black leading-[1.02] tracking-[-.045em] text-[#13171F] sm:text-5xl">{title}</h1>
