@@ -1,8 +1,8 @@
-# CampusIQ — AI-Powered Digital Campus Platform
+# CampOS — Campus Operating System
 
 ## Overview
 
-CampusIQ is a comprehensive digital campus management and student community platform designed to connect an entire college through a single unified ecosystem. It provides real-time communication, academic resource management, campus services, and AI-powered assistance.
+CampOS is a comprehensive digital campus management and student community platform designed to connect an entire college through a single unified ecosystem. It provides real-time communication, academic resource management, campus services, and AI-powered assistance.
 
 ## Architecture
 
@@ -26,10 +26,30 @@ CampusIQ is a comprehensive digital campus management and student community plat
 └─────────────────────────────────────────────────┘
 ```
 
+## Product status
+
+CampOS is under active development. The public landing page, authentication UI, application shell and first dashboard data queries are implemented. The database schema is an initial draft and must be reviewed/applied against the target Supabase project. Several modules are UI foundations and are not yet verified end-to-end. Do not use this deployment with real student data until the security and RLS checklist is completed.
+
+### Implemented frontend surfaces
+
+- Public landing page and responsive navigation
+- Login, registration, password recovery and password reset screens
+- Student dashboard with Supabase-backed announcements, notifications and room-membership queries
+- Initial page surfaces for rooms, messaging, resources, Lost & Found, Request Desk, announcements, events, clubs, marketplace, study groups, timetable, feedback, administration and AI
+
+### Planned / incomplete production workflows
+
+- Server-side registration provisioning and first-admin bootstrap
+- Complete role- and membership-scoped RLS policies for every table
+- Verified real-time messaging and private conversation workflows
+- Secure Storage policies and signed file access
+- Complete service, academic, events and moderation workflows
+- Permission-aware AI document ingestion, retrieval and citations
+
 ## Features
 
 ### Core Modules
-- **Authentication & Identity** — Supabase Auth with institutional verification, unique CampusIQ IDs
+- **Authentication & Identity** — Supabase Auth with institutional verification, unique CampOS IDs
 - **Campus Communication** — Real-time rooms, channels, and group discussions
 - **Private Messaging** — Direct messages, group conversations, message requests
 - **Academic Hub** — Resource upload/download, subject organization, bookmarks
@@ -181,13 +201,13 @@ supabase/
 
 ## Known Limitations & Dependencies
 
-1. **Supabase Required** — The application requires a configured Supabase project. Without it, the setup guide is displayed.
+1. **Supabase Required** — Netlify has the frontend URL and publishable key configured. Database schema/migrations and RLS policies still need to be applied and verified against the target project.
 
 2. **AI Services** — The AI assistant requires a configured AI provider (OpenAI/Anthropic) with API credentials. Without configuration, the interface is available but responses require backend integration.
 
 3. **Email Verification** — Requires Supabase email provider configuration for account verification.
 
-4. **File Storage** — Requires properly configured Supabase Storage buckets with appropriate policies.
+4. **File Storage** — Requires private buckets and tested Storage policies; bucket creation alone is not sufficient.
 
 5. **Real-time** — Requires Supabase Realtime to be enabled for the relevant tables.
 
@@ -197,13 +217,8 @@ supabase/
 
 ## Security Notes
 
-- All database access is protected by Row Level Security policies
-- Users cannot modify their own roles or verification status
-- Private messages are only accessible to conversation participants
-- File uploads are validated server-side
-- Audit logs track administrative actions
-- Suspended accounts are blocked at the database level
+The initial migration enables RLS on only a subset of tables and its first-pass policies are not yet sufficient for production use. Do not treat the security statements in the original product specification as completed controls. A follow-up migration and role-by-role authorization tests are required before storing real student information.
 
 ## License
 
-Proprietary — CampusIQ Platform
+Proprietary — CampOS Platform
