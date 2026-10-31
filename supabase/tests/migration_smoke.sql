@@ -42,6 +42,8 @@ DECLARE
   v_report_id uuid;
   v_claim_id uuid;
   v_event_id uuid;
+  v_assignment_id uuid;
+  v_submission_id uuid;
 BEGIN
   IF (SELECT count(*) FROM public.search_campus_directory('Student')) <> 0 THEN
     RAISE EXCEPTION 'Campus directory exposed a pending student';
@@ -119,6 +121,24 @@ BEGIN
   PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000002', false);
   IF public.register_for_campus_event(v_event_id) <> 'waitlisted' THEN
     RAISE EXCEPTION 'Event capacity did not place the second user on the waitlist';
+  END IF;
+
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
+  INSERT INTO public.assignments (college_id, title, description, due_at, status, created_by)
+  SELECT college_id, 'Test assignment', 'Complete the database migration workflow smoke test.', now() + interval '3 days', 'published', id
+  FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000001'
+  RETURNING id INTO v_assignment_id;
+
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000002', false);
+  v_submission_id := public.submit_campus_assignment(v_assignment_id, 'The test student has submitted this assignment response.');
+
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
+  PERFORM public.grade_campus_submission(v_submission_id, 95, 'Good work in the smoke test.');
+  IF NOT EXISTS (
+    SELECT 1 FROM public.assignment_submissions
+    WHERE id = v_submission_id AND status = 'graded' AND grade = 95
+  ) THEN
+    RAISE EXCEPTION 'Assignment submission was not graded successfully';
   END IF;
 
 END;
