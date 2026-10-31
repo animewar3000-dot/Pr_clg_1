@@ -649,11 +649,14 @@ CREATE POLICY "Users can join public rooms"
 -- Messages: Only room members can read
 CREATE POLICY "Room members can read messages"
   ON messages FOR SELECT
-  USING (room_id IS NOT NULL AND room_id IN (
-    SELECT room_id FROM room_members WHERE user_id = auth.uid()
-  )) OR (conversation_id IS NOT NULL AND conversation_id IN (
-    SELECT conversation_id FROM conversation_members WHERE user_id = auth.uid()
-  ));
+  USING (
+    (room_id IS NOT NULL AND room_id IN (
+      SELECT room_id FROM room_members WHERE user_id = auth.uid()
+    ))
+    OR (conversation_id IS NOT NULL AND conversation_id IN (
+      SELECT conversation_id FROM conversation_members WHERE user_id = auth.uid()
+    ))
+  );
 
 CREATE POLICY "Authenticated users can send messages"
   ON messages FOR INSERT
