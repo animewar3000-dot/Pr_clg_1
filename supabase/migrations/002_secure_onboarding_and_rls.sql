@@ -1248,6 +1248,9 @@ BEGIN
 
   UPDATE public.item_claims SET status = p_decision
   WHERE id = p_claim_id AND status = 'pending';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'This claim has already been reviewed';
+  END IF;
 
   IF p_decision = 'verified' THEN
     UPDATE public.item_reports SET status = 'handed_over', updated_at = now()
