@@ -43,6 +43,12 @@ export function RoomsPage() {
     enabled: !!supabase && !!user,
   });
 
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<any>({
+    resolver: zodResolver(roomCreateSchema) as any,
+  });
+
+  const onSubmit = (data: RoomFormData) => createMutation.mutate(data);
+
   const createMutation = useMutation({
     mutationFn: async (data: RoomFormData) => {
       if (!supabase) throw new Error('Supabase is not configured.');
@@ -74,12 +80,6 @@ export function RoomsPage() {
       await queryClient.invalidateQueries({ queryKey: ['rooms'] });
     },
   });
-
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<any>({
-    resolver: zodResolver(roomCreateSchema) as any,
-  });
-
-  const onSubmit = (data: RoomFormData) => createMutation.mutate(data);
 
   return (
     <div className="space-y-6">
