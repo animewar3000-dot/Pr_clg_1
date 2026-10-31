@@ -737,3 +737,99 @@ REVOKE ALL ON FUNCTION public.approve_campus_user(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.list_pending_campus_users() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.approve_campus_user(uuid) TO authenticated;
 
+
+
+-- Permission-aware campus directory. Only minimal public identity fields are returned.
+CREATE OR REPLACE FUNCTION public.search_campus_directory(p_query text)
+RETURNS TABLE (
+  id uuid,
+  display_name text,
+  campus_id text,
+  avatar_url text
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_college_id uuid;
+  v_query text;
+BEGIN
+  v_college_id := app_private.current_college_id();
+  v_query := trim(coalesce(p_query, ''));
+
+  IF v_query = '' OR char_length(v_query) < 2 THEN
+    RETURN;
+  END IF;
+  IF v_college_id IS NULL OR NOT app_private.is_active_college_member(v_college_id) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT p.id, p.display_name, p.campus_id, p.avatar_url
+  FROM public.profiles p
+  WHERE p.college_id = v_college_id
+    AND p.account_status = 'active'
+    AND coalesce((p.privacy_settings ->> 'searchable')::boolean, true)
+    AND (
+      p.display_name ILIKE '%' || replace(replace(v_query, '%', '\\%'), '_', '\\_') || '%'
+      OR p.campus_id ILIKE '%' || replace(replace(v_query, '%', '\\%'), '_', '\\_') || '%'
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM public.user_blocks b
+      WHERE (b.blocker_id = auth.uid() AND b.blocked_id = p.id)
+         OR (b.blocker_id = p.id AND b.blocked_id = auth.uid())
+    )
+    AND p.id <> auth.uid()
+  ORDER BY p.display_name
+  LIMIT 20;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.list_my_conversations()
+RETURNS TABLE (
+  id uuid,
+  type text,
+  title text,
+  last_message_at timestamptz,
+  other_display_name text,
+  other_avatar_url text
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+BEGIN
+  IF auth.uid() IS NULL OR NOT app_private.is_active_college_member(app_private.current_college_id()) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    c.id,
+    c.type,
+    c.title,
+    c.last_message_at,
+    coalesce(string_agg(DISTINCT other_profile.display_name, ', '), c.title, 'Conversation') AS other_display_name,
+    min(other_profile.avatar_url) AS other_avatar_url
+  FROM public.conversations c
+  JOIN public.conversation_members mine
+    ON mine.conversation_id = c.id AND mine.user_id = auth.uid()
+  LEFT JOIN public.conversation_members other_member
+    ON other_member.conversation_id = c.id AND other_member.user_id <> auth.uid()
+  LEFT JOIN public.profiles other_profile
+    ON other_profile.id = other_member.user_id
+    AND other_profile.account_status = 'active'
+    AND other_profile.college_id = app_private.current_college_id()
+  GROUP BY c.id, c.type, c.title, c.last_message_at
+  ORDER BY c.last_message_at DESC NULLS LAST, c.created_at DESC;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.search_campus_directory(text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.list_my_conversations() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.search_campus_directory(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.list_my_conversations() TO authenticated;
+
