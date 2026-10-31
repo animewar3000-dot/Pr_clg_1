@@ -177,6 +177,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: session?.user ?? null,
         session,
         isLoading: false,
+        isProfileLoading: Boolean(session?.user),
+        profile: null,
+        roles: [],
+        accountStatus: 'pending_verification',
       }));
       if (session?.user) {
         fetchProfile(session.user.id);
@@ -191,6 +195,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           user: session?.user ?? null,
           session,
           isLoading: event === 'INITIAL_SESSION',
+          isProfileLoading: Boolean(session?.user),
+          profile: session?.user?.id === prev.user?.id ? prev.profile : null,
+          roles: session?.user?.id === prev.user?.id ? prev.roles : [],
         }));
         if (session?.user) {
           fetchProfile(session.user.id);
