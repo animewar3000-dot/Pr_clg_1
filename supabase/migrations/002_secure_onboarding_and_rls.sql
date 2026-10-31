@@ -940,3 +940,50 @@ AS $$
   );
 $$;
 
+
+
+-- Create a room and its creator membership in one trusted database transaction.
+CREATE OR REPLACE FUNCTION public.create_campus_room(
+  p_name text,
+  p_description text,
+  p_type text,
+  p_visibility text DEFAULT 'public'
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_college_id uuid;
+  v_room_id uuid;
+BEGIN
+  v_college_id := app_private.current_college_id();
+  IF auth.uid() IS NULL OR v_college_id IS NULL
+     OR NOT app_private.is_active_college_member(v_college_id) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+  IF length(trim(coalesce(p_name, ''))) < 3 OR length(p_name) > 100 THEN
+    RAISE EXCEPTION 'Room name must be between 3 and 100 characters';
+  END IF;
+  IF p_type NOT IN ('interest_community','study_group','private') THEN
+    RAISE EXCEPTION 'This room type cannot be created by a student';
+  END IF;
+  IF p_visibility NOT IN ('public','private','restricted') THEN
+    RAISE EXCEPTION 'Invalid room visibility';
+  END IF;
+
+  INSERT INTO public.rooms (college_id, name, description, type, visibility, created_by)
+  VALUES (v_college_id, trim(p_name), nullif(trim(coalesce(p_description, '')), ''), p_type, p_visibility, auth.uid())
+  RETURNING id INTO v_room_id;
+
+  INSERT INTO public.room_members (room_id, user_id, role)
+  VALUES (v_room_id, auth.uid(), 'admin');
+
+  RETURN v_room_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.create_campus_room(text, text, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.create_campus_room(text, text, text, text) TO authenticated;
+
