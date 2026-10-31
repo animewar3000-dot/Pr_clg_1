@@ -43,7 +43,8 @@ FROM public.colleges c
 WHERE p.college_id = c.id
   AND upper(c.code) = upper('OFFICIAL_SHORT_CODE')
   AND lower(p.email) = lower('ADMIN_EMAIL@official-college-domain.edu')
-  AND p.account_status = 'pending_verification';
+  AND p.account_status = 'pending_verification'
+  AND EXISTS (SELECT 1 FROM auth.users u WHERE u.id = p.id AND u.email_confirmed_at IS NOT NULL);
 
 INSERT INTO public.role_assignments (
   user_id, role, scope_type, scope_id, granted_by
@@ -54,6 +55,7 @@ JOIN public.colleges c ON c.id = p.college_id
 WHERE upper(c.code) = upper('OFFICIAL_SHORT_CODE')
   AND lower(p.email) = lower('ADMIN_EMAIL@official-college-domain.edu')
   AND p.account_status = 'active'
+  AND EXISTS (SELECT 1 FROM auth.users u WHERE u.id = p.id AND u.email_confirmed_at IS NOT NULL)
 ON CONFLICT (user_id, role, scope_type, scope_id) DO NOTHING;
 
 COMMIT;
