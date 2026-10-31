@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AlertTriangle, Clock3, LogOut, ShieldCheck } from 'lucide-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { isSupabaseConfigured } from './lib/config';
@@ -37,8 +38,52 @@ const queryClient = new QueryClient({
   },
 });
 
+
+function AccountAccessScreen() {
+  const { profile, accountStatus, isProfileLoading, error, signOut } = useAuth();
+
+  if (isProfileLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F8F5EC] p-6">
+        <div className="text-center">
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-[#172B4D]/15 border-t-[#386BE8]" />
+          <p className="mt-4 text-sm font-semibold text-slate-600">Checking your campus identity…</p>
+        </div>
+      </div>
+    );
+  }
+
+  const pending = profile && accountStatus === 'pending_verification';
+  const suspended = accountStatus === 'suspended';
+  const title = !profile ? 'Campus profile unavailable' : pending ? 'Your application is being reviewed' : suspended ? 'Campus access is suspended' : 'Campus access is inactive';
+  const description = !profile
+    ? error || 'Your authentication account does not yet have a CampOS profile. Ask your college administrator to check the onboarding migration and college registration.'
+    : pending
+      ? 'Your email is registered, but a college administrator must verify your campus identity before you can access private rooms, messages or academic resources.'
+      : suspended
+        ? 'Your campus account has been suspended. Contact your college administrator if you believe this is a mistake.'
+        : 'This campus account is no longer active. Contact your college administrator for assistance.';
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#F8F5EC] p-5">
+      <section className="w-full max-w-lg rounded-3xl border border-[#172B4D]/10 bg-white p-7 text-center shadow-[0_20px_70px_rgba(23,43,77,.09)] sm:p-10">
+        <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E9F0FF] text-[#386BE8]">
+          {!profile || suspended ? <AlertTriangle size={28} /> : pending ? <Clock3 size={28} /> : <ShieldCheck size={28} />}
+        </div>
+        <p className="mt-6 text-[10px] font-black tracking-[.2em] text-[#386BE8]">CAMPOS / ACCOUNT ACCESS</p>
+        <h1 className="mt-3 text-2xl font-black tracking-tight text-[#172B4D]">{title}</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+        {profile?.campus_id && <p className="mt-5 rounded-xl bg-slate-50 px-4 py-3 text-xs font-bold text-slate-500">Campus ID: {profile.campus_id}</p>}
+        <button type="button" onClick={() => void signOut()} className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#172B4D]/15 px-5 text-sm font-extrabold text-[#172B4D] transition hover:bg-slate-50">
+          <LogOut size={16} /> Sign out
+        </button>
+      </section>
+    </main>
+  );
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, isConfigured } = useAuth();
+  const { user, profile, accountStatus, isLoading, isProfileLoading, isConfigured } = useAuth();
   const location = useLocation();
 
   // Keep the public landing page available even before Supabase is configured.
@@ -64,6 +109,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return <Navigate to="/auth/login" replace />;
+  }
+
+  if (isProfileLoading || !profile || accountStatus !== 'active') {
+    return <AccountAccessScreen />;
   }
 
   return <>{children}</>;
