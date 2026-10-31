@@ -1395,3 +1395,171 @@ DROP POLICY IF EXISTS moderation_reports_create_self ON public.moderation_report
 CREATE POLICY moderation_reports_create_self ON public.moderation_reports FOR INSERT TO authenticated
 WITH CHECK (reporter_id = auth.uid() AND app_private.is_active_college_member(app_private.current_college_id()));
 
+
+
+-- Academic assignments and student submissions.
+CREATE TABLE IF NOT EXISTS public.assignments (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  college_id uuid NOT NULL REFERENCES public.colleges(id) ON DELETE CASCADE,
+  subject_id uuid REFERENCES public.subjects(id) ON DELETE SET NULL,
+  section_id uuid REFERENCES public.sections(id) ON DELETE SET NULL,
+  title text NOT NULL CHECK (char_length(trim(title)) BETWEEN 4 AND 160),
+  description text NOT NULL CHECK (char_length(trim(description)) BETWEEN 10 AND 10000),
+  due_at timestamptz NOT NULL,
+  status text NOT NULL DEFAULT 'published' CHECK (status IN ('draft','published','closed')),
+  created_by uuid NOT NULL REFERENCES public.profiles(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.assignment_submissions (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  assignment_id uuid NOT NULL REFERENCES public.assignments(id) ON DELETE CASCADE,
+  student_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  answer_text text NOT NULL CHECK (char_length(trim(answer_text)) BETWEEN 1 AND 10000),
+  submitted_at timestamptz NOT NULL DEFAULT now(),
+  status text NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted','late','graded')),
+  grade numeric(5,2) CHECK (grade IS NULL OR (grade >= 0 AND grade <= 100)),
+  feedback text,
+  graded_by uuid REFERENCES public.profiles(id),
+  graded_at timestamptz,
+  UNIQUE (assignment_id, student_id)
+);
+
+CREATE INDEX IF NOT EXISTS assignments_college_due_idx ON public.assignments(college_id, due_at);
+CREATE INDEX IF NOT EXISTS assignment_submissions_assignment_idx ON public.assignment_submissions(assignment_id, submitted_at);
+
+ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assignment_submissions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY assignments_read_visible ON public.assignments FOR SELECT TO authenticated
+USING (
+  college_id = app_private.current_college_id()
+  AND app_private.is_active_college_member(college_id)
+  AND (
+    created_by = auth.uid()
+    OR (status = 'published' AND (section_id IS NULL OR section_id = (
+      SELECT p.section_id FROM public.profiles p WHERE p.id = auth.uid()
+    )))
+  )
+);
+
+CREATE POLICY assignments_create_authorized ON public.assignments FOR INSERT TO authenticated
+WITH CHECK (
+  created_by = auth.uid()
+  AND college_id = app_private.current_college_id()
+  AND app_private.has_college_role(college_id, ARRAY['faculty','department_admin','college_admin','super_admin'])
+);
+
+CREATE POLICY assignments_update_authorized ON public.assignments FOR UPDATE TO authenticated
+USING (
+  created_by = auth.uid()
+  OR app_private.has_college_role(college_id, ARRAY['department_admin','college_admin','super_admin'])
+)
+WITH CHECK (
+  college_id = app_private.current_college_id()
+  AND (
+    created_by = auth.uid()
+    OR app_private.has_college_role(college_id, ARRAY['department_admin','college_admin','super_admin'])
+  )
+);
+
+CREATE POLICY assignment_submissions_read_authorized ON public.assignment_submissions FOR SELECT TO authenticated
+USING (
+  student_id = auth.uid()
+  OR EXISTS (
+    SELECT 1 FROM public.assignments a
+    WHERE a.id = assignment_id
+      AND (
+        a.created_by = auth.uid()
+        OR app_private.has_college_role(a.college_id, ARRAY['department_admin','college_admin','super_admin'])
+      )
+  )
+);
+
+CREATE OR REPLACE FUNCTION public.submit_campus_assignment(p_assignment_id uuid, p_answer_text text)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_assignment public.assignments%ROWTYPE;
+  v_submission_id uuid;
+  v_student_section uuid;
+BEGIN
+  IF auth.uid() IS NULL OR NOT app_private.is_active_college_member(app_private.current_college_id()) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+  IF length(trim(coalesce(p_answer_text, ''))) < 1 OR length(p_answer_text) > 10000 THEN
+    RAISE EXCEPTION 'Submission must contain between 1 and 10000 characters';
+  END IF;
+
+  SELECT section_id INTO v_student_section FROM public.profiles WHERE id = auth.uid();
+  SELECT * INTO v_assignment
+  FROM public.assignments
+  WHERE id = p_assignment_id
+    AND college_id = app_private.current_college_id()
+    AND status = 'published'
+    AND (section_id IS NULL OR section_id = v_student_section)
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Assignment is not available to your account';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.assignment_submissions WHERE assignment_id = p_assignment_id AND student_id = auth.uid()) THEN
+    RAISE EXCEPTION 'You have already submitted this assignment';
+  END IF;
+
+  INSERT INTO public.assignment_submissions (assignment_id, student_id, answer_text, status)
+  VALUES (
+    p_assignment_id,
+    auth.uid(),
+    trim(p_answer_text),
+    CASE WHEN v_assignment.due_at < now() THEN 'late' ELSE 'submitted' END
+  )
+  RETURNING id INTO v_submission_id;
+
+  RETURN v_submission_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.grade_campus_submission(p_submission_id uuid, p_grade numeric, p_feedback text DEFAULT NULL)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_college_id uuid;
+  v_creator_id uuid;
+BEGIN
+  IF p_grade < 0 OR p_grade > 100 THEN
+    RAISE EXCEPTION 'Grade must be between 0 and 100';
+  END IF;
+
+  SELECT a.college_id, a.created_by INTO v_college_id, v_creator_id
+  FROM public.assignment_submissions s
+  JOIN public.assignments a ON a.id = s.assignment_id
+  WHERE s.id = p_submission_id;
+
+  IF v_college_id IS NULL OR v_college_id <> app_private.current_college_id()
+     OR (v_creator_id <> auth.uid()
+       AND NOT app_private.has_college_role(v_college_id, ARRAY['department_admin','college_admin','super_admin'])) THEN
+    RAISE EXCEPTION 'Only the assignment author or an authorized administrator can grade submissions';
+  END IF;
+
+  UPDATE public.assignment_submissions
+  SET grade = p_grade, feedback = nullif(trim(coalesce(p_feedback, '')), ''),
+      status = 'graded', graded_by = auth.uid(), graded_at = now()
+  WHERE id = p_submission_id;
+
+  RETURN true;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.submit_campus_assignment(uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.grade_campus_submission(uuid, numeric, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.submit_campus_assignment(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.grade_campus_submission(uuid, numeric, text) TO authenticated;
+
