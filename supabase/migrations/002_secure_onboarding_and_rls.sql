@@ -671,6 +671,7 @@ RETURNS TABLE (
   display_name text,
   email text,
   campus_id text,
+  email_verified boolean,
   created_at timestamptz
 )
 LANGUAGE plpgsql
@@ -689,8 +690,10 @@ BEGIN
   END IF;
 
   RETURN QUERY
-  SELECT p.id, p.display_name, p.email, p.campus_id, p.created_at
+  SELECT p.id, p.display_name, p.email, p.campus_id,
+         (u.email_confirmed_at IS NOT NULL) AS email_verified, p.created_at
   FROM public.profiles p
+  JOIN auth.users u ON u.id = p.id
   WHERE p.college_id = v_college_id
     AND p.account_status = 'pending_verification'
   ORDER BY p.created_at ASC;
@@ -721,6 +724,13 @@ BEGIN
 
   IF v_target_college_id IS NULL OR v_target_college_id <> v_college_id THEN
     RAISE EXCEPTION 'Pending user was not found in your college';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM auth.users
+    WHERE id = p_user_id AND email_confirmed_at IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'The student must verify their college email before approval';
   END IF;
 
   UPDATE public.profiles
