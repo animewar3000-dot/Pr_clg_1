@@ -47,8 +47,6 @@ export function RoomsPage() {
     resolver: zodResolver(roomCreateSchema) as any,
   });
 
-  const onSubmit = (data: RoomFormData) => createMutation.mutate(data);
-
   const createMutation = useMutation({
     mutationFn: async (data: RoomFormData) => {
       if (!supabase) throw new Error('Supabase is not configured.');
@@ -68,6 +66,8 @@ export function RoomsPage() {
       reset();
     },
   });
+
+  const onSubmit = (data: RoomFormData) => createMutation.mutate(data);
 
   const joinMutation = useMutation({
     mutationFn: async (roomId: string) => {
