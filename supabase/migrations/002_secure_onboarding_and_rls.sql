@@ -148,6 +148,7 @@ REVOKE ALL ON FUNCTION app_private.has_college_role(uuid, text[]) FROM PUBLIC;
 REVOKE ALL ON FUNCTION app_private.is_room_member(uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION app_private.is_conversation_member(uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION app_private.can_read_ticket(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION app_private.bootstrap_auth_user() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION app_private.current_college_id() TO authenticated;
 GRANT EXECUTE ON FUNCTION app_private.is_active_college_member(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION app_private.has_college_role(uuid, text[]) TO authenticated;
@@ -269,7 +270,7 @@ WITH CHECK (
   AND EXISTS (
     SELECT 1 FROM public.rooms r
     WHERE r.id = room_id AND r.college_id = app_private.current_college_id()
-      AND r.visibility = 'public' AND app_private.is_active_college_member(r.college_id)
+      AND (r.visibility = 'public' OR r.created_by = auth.uid()) AND app_private.is_active_college_member(r.college_id)
   )
 );
 CREATE POLICY room_members_leave_self ON public.room_members FOR DELETE TO authenticated
@@ -294,7 +295,10 @@ USING (sender_id = auth.uid() AND (
   (room_id IS NOT NULL AND app_private.is_room_member(room_id))
   OR (conversation_id IS NOT NULL AND app_private.is_conversation_member(conversation_id))
 ))
-WITH CHECK (sender_id = auth.uid());
+WITH CHECK (sender_id = auth.uid() AND (
+  (room_id IS NOT NULL AND conversation_id IS NULL AND app_private.is_room_member(room_id))
+  OR (conversation_id IS NOT NULL AND room_id IS NULL AND app_private.is_conversation_member(conversation_id))
+));
 
 CREATE POLICY message_reactions_read ON public.message_reactions FOR SELECT TO authenticated
 USING (EXISTS (SELECT 1 FROM public.messages m WHERE m.id = message_id));
@@ -306,6 +310,73 @@ CREATE POLICY message_attachments_read ON public.message_attachments FOR SELECT 
 USING (EXISTS (SELECT 1 FROM public.messages m WHERE m.id = message_id));
 CREATE POLICY message_attachments_insert ON public.message_attachments FOR INSERT TO authenticated
 WITH CHECK (EXISTS (SELECT 1 FROM public.messages m WHERE m.id = message_id AND m.sender_id = auth.uid()));
+
+
+-- Create a direct conversation atomically after checking both campus identities and blocks.
+CREATE OR REPLACE FUNCTION public.create_direct_conversation(p_other_user_id uuid)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $
+DECLARE
+  v_my_college_id uuid;
+  v_other_college_id uuid;
+  v_conversation_id uuid;
+BEGIN
+  IF auth.uid() IS NULL OR p_other_user_id IS NULL OR p_other_user_id = auth.uid() THEN
+    RAISE EXCEPTION 'A valid other campus member is required';
+  END IF;
+
+  SELECT college_id INTO v_my_college_id
+  FROM public.profiles
+  WHERE id = auth.uid() AND account_status = 'active';
+
+  SELECT college_id INTO v_other_college_id
+  FROM public.profiles
+  WHERE id = p_other_user_id AND account_status = 'active'
+    AND coalesce((privacy_settings ->> 'allow_direct_messages')::boolean, true);
+
+  IF v_my_college_id IS NULL OR v_other_college_id IS NULL OR v_my_college_id <> v_other_college_id THEN
+    RAISE EXCEPTION 'Direct messages are available only between active members of the same college';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM public.user_blocks b
+    WHERE (b.blocker_id = auth.uid() AND b.blocked_id = p_other_user_id)
+       OR (b.blocker_id = p_other_user_id AND b.blocked_id = auth.uid())
+  ) THEN
+    RAISE EXCEPTION 'This conversation cannot be started because a participant has blocked the other';
+  END IF;
+
+  SELECT c.id INTO v_conversation_id
+  FROM public.conversations c
+  JOIN public.conversation_members mine
+    ON mine.conversation_id = c.id AND mine.user_id = auth.uid()
+  JOIN public.conversation_members theirs
+    ON theirs.conversation_id = c.id AND theirs.user_id = p_other_user_id
+  WHERE c.type = 'direct'
+  LIMIT 1;
+
+  IF v_conversation_id IS NOT NULL THEN
+    RETURN v_conversation_id;
+  END IF;
+
+  INSERT INTO public.conversations (type, created_by)
+  VALUES ('direct', auth.uid())
+  RETURNING id INTO v_conversation_id;
+
+  INSERT INTO public.conversation_members (conversation_id, user_id, role)
+  VALUES
+    (v_conversation_id, auth.uid(), 'admin'),
+    (v_conversation_id, p_other_user_id, 'member');
+
+  RETURN v_conversation_id;
+END;
+$;
+
+REVOKE ALL ON FUNCTION public.create_direct_conversation(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.create_direct_conversation(uuid) TO authenticated;
 
 -- Direct conversations. Membership rows cannot be fabricated to add arbitrary users.
 CREATE POLICY conversations_read_members ON public.conversations FOR SELECT TO authenticated
