@@ -19,6 +19,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 const features = [
   { icon: Users, number: '01', title: 'Find your people', description: 'Section-wise rooms, subject spaces, private messages and study groups keep conversations close to the work.' },
@@ -208,12 +209,12 @@ export function LandingPage() {
               <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-.04em] text-[#13171F] sm:text-5xl">Campus access should feel personal. Security should be serious.</h2>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
-              {[
+              {([
                 [ShieldCheck, 'Verified identities', 'Registration and campus identity checks are controlled by the institution.'],
                 [LockKeyhole, 'Private conversations', 'Private messages must be restricted to authorized participants.'],
                 [GraduationCap, 'Role-aware spaces', 'Students, faculty and staff see the tools appropriate to their permissions.'],
                 [FileSearch, 'Grounded AI answers', 'The assistant should cite approved documents and respect document access rules.'],
-              ].map(([Icon, title, description]) => (
+              ] as [LucideIcon, string, string][]).map(([Icon, title, description]) => (
                 <div key={title as string} className="flex gap-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#E9F0FF] text-[#386BE8]"><Icon size={19} aria-hidden="true" /></span>
                   <div><h3 className="font-extrabold text-[#172B4D]">{title as string}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{description as string}</p></div>
