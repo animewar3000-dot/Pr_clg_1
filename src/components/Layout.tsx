@@ -3,10 +3,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import {
-  Activity, ArrowUpRight, Bell, BookOpen, Bot, CalendarDays, ChevronLeft,
-  ChevronRight, CircleHelp, Clock3, Command, FileSearch, GraduationCap,
+  ArrowUpRight, Bell, BookOpen, Bot, CalendarDays, ChevronLeft,
+  ChevronRight, Clock3, Command, GraduationationCap,
   Heart, LayoutDashboard, LogOut, Menu, MessageCircle, MessageSquare,
-  Plus, Search, Settings, ShieldCheck, ShoppingBag, Users, Wrench, X,
+  Plus, Search, ShieldCheck, ShoppingBag, Users, Wrench, X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
