@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
-  ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, CircleAlert,
+  ArrowRight, Bell, BookOpen, CalendarDays, CheckCircle2, AlertCircle,
   FileText, MessageSquare, Search, Users, Wrench,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
