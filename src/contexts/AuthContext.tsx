@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           user: session?.user ?? null,
           session,
           isLoading: false,
-          isProfileLoading: Boolean(session?.user) && (!sameUser || event === 'SIGNED_IN' || event === 'INITIAL_SESSION'),
+          isProfileLoading: Boolean(session?.user) && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED'),
           profile: sameUser ? prev.profile : null,
           roles: sameUser ? prev.roles : [],
           accountStatus: sameUser ? prev.accountStatus : 'pending_verification',
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       });
 
-      if (session?.user && (!state.user || state.user.id !== session.user.id || event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED')) {
+      if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED')) {
         // Defer Supabase queries until the auth callback releases its internal lock.
         window.setTimeout(() => { void fetchProfile(session.user.id); }, 0);
       }
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProfile, state.user]);
+  }, [fetchProfile]);
 
   const signIn = async (email: string, password: string) => {
     const supabase = getSupabase();
