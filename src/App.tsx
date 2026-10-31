@@ -12,6 +12,7 @@ import { RoomsPage } from './pages/communication/RoomsPage';
 import { RoomDetailPage } from './pages/communication/RoomDetailPage';
 import { MessagesPage } from './pages/communication/MessagesPage';
 import { ResourcesPage } from './pages/academic/ResourcesPage';
+import { AssignmentsPage } from './pages/academic/AssignmentsPage';
 import { LostFoundPage } from './pages/services/LostFoundPage';
 import { RequestDeskPage } from './pages/services/RequestDeskPage';
 import { AnnouncementsPage } from './pages/campus/AnnouncementsPage';
@@ -164,6 +165,7 @@ function AppRoutes() {
         
         {/* Academic */}
         <Route path="resources" element={<ResourcesPage />} />
+        <Route path="assignments" element={<AssignmentsPage />} />
         
         {/* Services */}
         <Route path="lost-found" element={<LostFoundPage />} />
