@@ -10,6 +10,7 @@ import type { Resource } from '../../lib/types';
 import type { z } from 'zod';
 
 type FormData = z.infer<typeof resourceUploadSchema>;
+type ResourceWithSignedUrl = Resource & { signed_url: string | null };
 
 export function ResourcesPage() {
   const { user, profile } = useAuth();
@@ -25,8 +26,14 @@ export function ResourcesPage() {
       if (!supabase || !profile) return [];
       let query = supabase.from('resources').select('*, uploader:profiles!uploaded_by(display_name)').eq('college_id', profile.college_id).eq('status', 'approved').order('created_at', { ascending: false });
       if (search) query = query.ilike('title', `%${search}%`);
-      const { data } = await query.limit(50);
-      return (data || []) as Resource[];
+      const { data, error } = await query.limit(50);
+      if (error) throw error;
+      return Promise.all((data || []).map(async (resource) => {
+        const { data: signed, error: signedError } = await supabase.storage
+          .from('resources')
+          .createSignedUrl(resource.file_url, 15 * 60);
+        return { ...resource, signed_url: signedError ? null : signed.signedUrl } as ResourceWithSignedUrl;
+      }));
     },
     enabled: !!supabase && !!profile,
   });
@@ -34,18 +41,21 @@ export function ResourcesPage() {
   const uploadMutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (!supabase || !profile || !user || !selectedFile) throw new Error('Missing data');
-      const fileExt = selectedFile.name.split('.').pop();
-      const filePath = `${profile.college_id}/${user.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('resources').upload(filePath, selectedFile);
+      const allowedTypes = new Set(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'image/jpeg', 'image/png']);
+      if (!allowedTypes.has(selectedFile.type)) throw new Error('Upload a PDF, Word document, PowerPoint or PNG/JPEG image.');
+      if (selectedFile.size > 20 * 1024 * 1024) throw new Error('File size must be 20 MB or less.');
+      const fileExt = selectedFile.name.split('.').pop()?.toLowerCase();
+      if (!fileExt || !/^(pdf|doc|docx|ppt|pptx|jpg|jpeg|png)$/.test(fileExt)) throw new Error('Unsupported file extension.');
+      const filePath = `${profile.college_id}/${user.id}/${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('resources').upload(filePath, selectedFile, { contentType: selectedFile.type, upsert: false });
       if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from('resources').getPublicUrl(filePath);
       const { error: dbError } = await supabase.from('resources').insert({
         college_id: profile.college_id,
         subject_id: data.subjectId || null,
         title: data.title,
         description: data.description,
         type: data.type,
-        file_url: urlData.publicUrl,
+        file_url: filePath,
         file_name: selectedFile.name,
         file_type: selectedFile.type,
         file_size: selectedFile.size,
@@ -53,7 +63,10 @@ export function ResourcesPage() {
         visibility: data.visibility,
         status: 'pending_review',
       });
-      if (dbError) throw dbError;
+      if (dbError) {
+        await supabase.storage.from('resources').remove([filePath]);
+        throw dbError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
@@ -115,7 +128,7 @@ export function ResourcesPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
-              <input type="file" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} className="w-full text-sm" />
+              <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} className="w-full text-sm" />\n              <p className="mt-1 text-xs text-gray-500">PDF, Word, PowerPoint or PNG/JPEG · Maximum 20 MB. Files are stored privately.</p>
             </div>
             <button type="submit" disabled={uploadMutation.isPending || !selectedFile} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
               {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
