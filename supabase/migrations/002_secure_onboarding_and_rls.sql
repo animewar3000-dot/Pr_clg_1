@@ -113,7 +113,7 @@ BEGIN
   SELECT c.id INTO v_college_id
   FROM public.colleges c
   WHERE upper(c.code) = v_college_code
-    AND lower(c.email_domain) = lower(split_part(NEW.email, '@', 2))
+    AND (c.email_domain = '*' OR lower(c.email_domain) = lower(split_part(NEW.email, '@', 2)))
   LIMIT 1;
 
   IF v_college_id IS NULL THEN
