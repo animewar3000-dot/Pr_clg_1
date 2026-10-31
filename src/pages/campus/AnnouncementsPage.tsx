@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Megaphone, Plus, X, CalendarClock, AlertCircle } from 'lucide-react';
+import { Megaphone, Plus, X, CalendarClock } from 'lucide-react';
 import { getSupabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Announcement } from '../../lib/types';
