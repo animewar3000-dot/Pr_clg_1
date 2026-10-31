@@ -45,7 +45,7 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout eyebrow="CREATE YOUR CAMPUS IDENTITY" title="Start with your details." description="Use the details your college can verify. Your unique CampusIQ ID is generated after approval.">
+    <AuthLayout eyebrow="CREATE YOUR CAMPUS IDENTITY" title="Start with your details." description="Use the details your college can verify. Your unique CampOS ID is generated after approval.">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {authError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
         <div>
