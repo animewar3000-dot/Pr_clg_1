@@ -32,9 +32,6 @@ INSERT INTO public.role_assignments (user_id, role, scope_type, scope_id, grante
 SELECT id, 'college_admin', 'college', college_id, id
 FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000001';
 
-UPDATE public.profiles SET account_status = 'active'
-WHERE id = '00000000-0000-4000-8000-000000000002';
-
 SELECT set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
 
 DO $$
@@ -46,8 +43,16 @@ BEGIN
     RAISE EXCEPTION 'Campus directory RPC returned unexpected results';
   END IF;
 
-  IF (SELECT count(*) FROM public.list_pending_campus_users()) <> 0 THEN
-    RAISE EXCEPTION 'Unexpected pending user count after activation';
+  IF (SELECT count(*) FROM public.list_pending_campus_users()) <> 1 THEN
+    RAISE EXCEPTION 'Admin verification queue did not return the pending student';
+  END IF;
+
+  IF NOT public.approve_campus_user('00000000-0000-4000-8000-000000000002') THEN
+    RAISE EXCEPTION 'Admin approval RPC did not approve the student';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000002' AND account_status = 'active') THEN
+    RAISE EXCEPTION 'Approved student is not active';
   END IF;
 
   v_room_id := public.create_campus_room('Test Study Room', 'Migration smoke test', 'study_group', 'public');
