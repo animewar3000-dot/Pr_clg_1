@@ -492,6 +492,9 @@ WITH CHECK (user_id = auth.uid() AND EXISTS (
 CREATE POLICY event_registrations_delete_self ON public.event_registrations FOR DELETE TO authenticated
 USING (user_id = auth.uid());
 
+-- Event registration must go through register_for_campus_event so capacity and waitlists cannot be bypassed.
+DROP POLICY IF EXISTS event_registrations_create_self ON public.event_registrations;
+
 -- Clubs, marketplace and study groups.
 CREATE POLICY clubs_read_college ON public.clubs FOR SELECT TO authenticated
 USING (college_id = app_private.current_college_id() AND app_private.is_active_college_member(college_id));
