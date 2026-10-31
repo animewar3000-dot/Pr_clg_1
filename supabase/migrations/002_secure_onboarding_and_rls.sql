@@ -1276,3 +1276,112 @@ GRANT EXECUTE ON FUNCTION public.claim_lost_found_item(uuid, text) TO authentica
 GRANT EXECUTE ON FUNCTION public.list_my_item_claims() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.review_item_claim(uuid, text) TO authenticated;
 
+
+
+-- Pending, suspended and deactivated accounts must not create campus content or memberships.
+DROP POLICY IF EXISTS message_requests_create_self ON public.message_requests;
+CREATE POLICY message_requests_create_self ON public.message_requests FOR INSERT TO authenticated
+WITH CHECK (
+  from_user_id = auth.uid()
+  AND app_private.is_active_college_member(app_private.current_college_id())
+  AND EXISTS (
+    SELECT 1 FROM public.profiles p
+    WHERE p.id = to_user_id AND p.college_id = app_private.current_college_id()
+      AND p.account_status = 'active'
+  )
+);
+
+DROP POLICY IF EXISTS user_blocks_create_self ON public.user_blocks;
+CREATE POLICY user_blocks_create_self ON public.user_blocks FOR INSERT TO authenticated
+WITH CHECK (blocker_id = auth.uid() AND blocked_id <> auth.uid()
+  AND app_private.is_active_college_member(app_private.current_college_id()));
+
+DROP POLICY IF EXISTS resources_upload_pending ON public.resources;
+CREATE POLICY resources_upload_pending ON public.resources FOR INSERT TO authenticated
+WITH CHECK (
+  uploaded_by = auth.uid()
+  AND college_id = app_private.current_college_id()
+  AND status = 'pending_review'
+  AND app_private.is_active_college_member(college_id)
+);
+
+DROP POLICY IF EXISTS resource_bookmarks_create_self ON public.resource_bookmarks;
+CREATE POLICY resource_bookmarks_create_self ON public.resource_bookmarks FOR INSERT TO authenticated
+WITH CHECK (
+  user_id = auth.uid()
+  AND app_private.is_active_college_member(app_private.current_college_id())
+  AND EXISTS (
+    SELECT 1 FROM public.resources r
+    WHERE r.id = resource_id AND r.college_id = app_private.current_college_id() AND r.status = 'approved'
+  )
+);
+
+DROP POLICY IF EXISTS item_reports_create_self ON public.item_reports;
+CREATE POLICY item_reports_create_self ON public.item_reports FOR INSERT TO authenticated
+WITH CHECK (
+  reporter_id = auth.uid()
+  AND college_id = app_private.current_college_id()
+  AND status = 'open'
+  AND app_private.is_active_college_member(college_id)
+);
+
+DROP POLICY IF EXISTS club_memberships_join_self ON public.club_memberships;
+CREATE POLICY club_memberships_join_self ON public.club_memberships FOR INSERT TO authenticated
+WITH CHECK (
+  user_id = auth.uid()
+  AND app_private.is_active_college_member(app_private.current_college_id())
+  AND EXISTS (
+    SELECT 1 FROM public.clubs c
+    WHERE c.id = club_id AND c.college_id = app_private.current_college_id()
+  )
+);
+
+DROP POLICY IF EXISTS marketplace_create_self ON public.marketplace_listings;
+CREATE POLICY marketplace_create_self ON public.marketplace_listings FOR INSERT TO authenticated
+WITH CHECK (
+  seller_id = auth.uid()
+  AND college_id = app_private.current_college_id()
+  AND status = 'active'
+  AND app_private.is_active_college_member(college_id)
+);
+
+DROP POLICY IF EXISTS marketplace_update_self ON public.marketplace_listings;
+CREATE POLICY marketplace_update_self ON public.marketplace_listings FOR UPDATE TO authenticated
+USING (seller_id = auth.uid() AND app_private.is_active_college_member(college_id))
+WITH CHECK (
+  seller_id = auth.uid()
+  AND college_id = app_private.current_college_id()
+  AND app_private.is_active_college_member(college_id)
+);
+
+DROP POLICY IF EXISTS study_groups_create_self ON public.study_groups;
+CREATE POLICY study_groups_create_self ON public.study_groups FOR INSERT TO authenticated
+WITH CHECK (
+  created_by = auth.uid()
+  AND college_id = app_private.current_college_id()
+  AND app_private.is_active_college_member(college_id)
+);
+
+DROP POLICY IF EXISTS study_group_members_join_self ON public.study_group_members;
+CREATE POLICY study_group_members_join_self ON public.study_group_members FOR INSERT TO authenticated
+WITH CHECK (
+  user_id = auth.uid()
+  AND app_private.is_active_college_member(app_private.current_college_id())
+  AND EXISTS (
+    SELECT 1 FROM public.study_groups sg
+    WHERE sg.id = group_id AND sg.college_id = app_private.current_college_id()
+  )
+);
+
+DROP POLICY IF EXISTS feedback_create_self ON public.feedback_submissions;
+CREATE POLICY feedback_create_self ON public.feedback_submissions FOR INSERT TO authenticated
+WITH CHECK (
+  (submitter_id = auth.uid() OR (is_anonymous AND submitter_id IS NULL))
+  AND college_id = app_private.current_college_id()
+  AND app_private.is_active_college_member(college_id)
+);
+
+DROP POLICY IF EXISTS moderation_reports_create_self ON public.moderation_reports;
+CREATE POLICY moderation_reports_create_self ON public.moderation_reports FOR INSERT TO authenticated
+WITH CHECK (reporter_id = auth.uid() AND app_private.is_active_college_member(app_private.current_college_id()));
+
