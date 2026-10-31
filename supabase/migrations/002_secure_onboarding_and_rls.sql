@@ -833,3 +833,66 @@ REVOKE ALL ON FUNCTION public.list_my_conversations() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.search_campus_directory(text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.list_my_conversations() TO authenticated;
 
+
+
+-- Respect audience targeting on scoped official announcements.
+CREATE OR REPLACE FUNCTION app_private.can_read_announcement(p_announcement_id uuid)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.announcements a
+    JOIN public.profiles viewer ON viewer.id = auth.uid()
+    WHERE a.id = p_announcement_id
+      AND a.college_id = viewer.college_id
+      AND viewer.account_status = 'active'
+      AND a.published_at <= now()
+      AND (a.expires_at IS NULL OR a.expires_at > now())
+      AND (
+        a.scope = 'college'
+        OR (a.scope = 'department' AND a.scope_id = viewer.department_id)
+        OR (a.scope = 'program' AND a.scope_id = viewer.program_id)
+        OR (a.scope = 'section' AND a.scope_id = viewer.section_id)
+        OR (a.scope = 'subject' AND EXISTS (
+          SELECT 1 FROM public.subjects subject
+          WHERE subject.id = a.scope_id
+            AND subject.department_id = viewer.department_id
+            AND subject.semester_id = viewer.semester_id
+        ))
+      )
+  );
+$$;
+
+REVOKE ALL ON FUNCTION app_private.can_read_announcement(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app_private.can_read_announcement(uuid) TO authenticated;
+DROP POLICY IF EXISTS announcements_read_college ON public.announcements;
+CREATE POLICY announcements_read_by_audience ON public.announcements FOR SELECT TO authenticated
+USING (app_private.can_read_announcement(id));
+
+-- A block disables access to an existing direct conversation in both directions.
+CREATE OR REPLACE FUNCTION app_private.is_conversation_member(p_conversation_id uuid)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.conversation_members mine
+    JOIN public.profiles viewer ON viewer.id = mine.user_id
+    WHERE mine.conversation_id = p_conversation_id
+      AND mine.user_id = auth.uid()
+      AND viewer.account_status = 'active'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM public.conversation_members other_member
+        JOIN public.user_blocks b
+          ON (b.blocker_id = auth.uid() AND b.blocked_id = other_member.user_id)
+          OR (b.blocker_id = other_member.user_id AND b.blocked_id = auth.uid())
+        WHERE other_member.conversation_id = p_conversation_id
+          AND other_member.user_id <> auth.uid()
+      )
+  );
+$$;
+
