@@ -16,7 +16,7 @@ export function SetupGuidePage() {
           <BrandMark size="lg" />
           <p className="mt-5 text-xs font-black tracking-[.2em] text-[#386BE8]">FIRST-TIME CONFIGURATION</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight text-[#172B4D] sm:text-4xl">One connection left.</h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">The CampOS frontend loaded successfully. Its Supabase connection is not configured for this deployment yet.</p>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">The CampOS frontend could not detect the required Supabase URL and public key in this deployment.</p>
         </div>
 
         <section className="rounded-3xl border border-[#172B4D]/10 bg-white p-5 shadow-[0_18px_55px_rgba(23,43,77,.08)] sm:p-8">
