@@ -158,9 +158,15 @@ export function ResourcesPage() {
                   <h3 className="font-semibold text-gray-900">{resource.title}</h3>
                   <p className="text-xs text-gray-500 mt-1">{resource.type.replace(/_/g, ' ')}</p>
                 </div>
-                <a href={resource.file_url} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-100 rounded">
-                  <Download className="h-4 w-4 text-gray-600" />
-                </a>
+                {resource.signed_url ? (
+                  <a href={resource.signed_url} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-gray-100 rounded" aria-label={`Download ${resource.title}`}>
+                    <Download className="h-4 w-4 text-gray-600" />
+                  </a>
+                ) : (
+                  <span className="p-2 text-gray-300" title="Secure file link unavailable">
+                    <Download className="h-4 w-4" />
+                  </span>
+                )}
               </div>
               {resource.description && <p className="text-sm text-gray-600 mt-2 line-clamp-2">{resource.description}</p>}
               <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
