@@ -18,23 +18,25 @@ export function RequestDeskPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState<'my' | 'all'>('my');
 
-  const { data: categories } = useQuery({
+  const { data: categories, isError: categoriesError } = useQuery({
     queryKey: ['ticket-categories', profile?.college_id],
     queryFn: async () => {
       if (!supabase || !profile) return [];
-      const { data } = await supabase.from('ticket_categories').select('*').eq('college_id', profile.college_id).eq('is_active', true);
+      const { data, error } = await supabase.from('ticket_categories').select('*').eq('college_id', profile.college_id).eq('is_active', true);
+      if (error) throw error;
       return (data || []) as TicketCategory[];
     },
     enabled: !!supabase && !!profile,
   });
 
-  const { data: tickets, isLoading } = useQuery({
+  const { data: tickets, isLoading, isError: ticketsError } = useQuery({
     queryKey: ['tickets', profile?.college_id, user?.id, filter],
     queryFn: async () => {
       if (!supabase || !profile) return [];
       let query = supabase.from('tickets').select('*').eq('college_id', profile.college_id).order('created_at', { ascending: false });
       if (filter === 'my' && user) query = query.eq('requester_id', user.id);
-      const { data } = await query.limit(50);
+      const { data, error } = await query.limit(50);
+      if (error) throw error;
       return (data || []) as Ticket[];
     },
     enabled: !!supabase && !!profile,
@@ -43,9 +45,7 @@ export function RequestDeskPage() {
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (!supabase || !profile || !user) throw new Error('Not configured');
-      const publicId = `TKT-${Date.now().toString(36).toUpperCase()}`;
       const { error } = await supabase.from('tickets').insert({
-        public_id: publicId,
         college_id: profile.college_id,
         requester_id: user.id,
         category_id: data.categoryId,
@@ -140,7 +140,10 @@ export function RequestDeskPage() {
         <button onClick={() => setFilter('all')} className={`px-3 py-1.5 rounded text-sm font-medium ${filter === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>All Requests</button>
       </div>
 
-      {isLoading ? (
+      {createMutation.isError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{createMutation.error instanceof Error ? createMutation.error.message : 'Request could not be submitted.'}</p>}
+      {categoriesError || ticketsError ? (
+        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Request Desk data could not be loaded. Check your account approval and database migration status.</p>
+      ) : isLoading ? (
         <div className="text-center py-8 text-gray-500">Loading tickets...</div>
       ) : !tickets || tickets.length === 0 ? (
         <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
