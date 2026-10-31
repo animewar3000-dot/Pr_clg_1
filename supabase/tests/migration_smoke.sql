@@ -38,6 +38,9 @@ DO $$
 DECLARE
   v_room_id uuid;
   v_conversation_id uuid;
+  v_report_id uuid;
+  v_claim_id uuid;
+  v_event_id uuid;
 BEGIN
   IF (SELECT count(*) FROM public.search_campus_directory('Student')) <> 0 THEN
     RAISE EXCEPTION 'Campus directory exposed a pending student';
@@ -72,9 +75,44 @@ BEGIN
     RAISE EXCEPTION 'Direct conversation did not create both participants';
   END IF;
 
+
   IF (SELECT count(*) FROM public.list_my_conversations()) <> 1 THEN
     RAISE EXCEPTION 'Conversation list RPC did not return the new conversation';
   END IF;
+
+  INSERT INTO public.item_reports (
+    college_id, report_type, title, description, category, location, date, reporter_id, status
+  )
+  SELECT college_id, 'found', 'Blue notebook', 'Found near the library entrance', 'Books', 'Library', '2026-10-31', id, 'open'
+  FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000001'
+  RETURNING id INTO v_report_id;
+
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000002', false);
+  v_claim_id := public.claim_lost_found_item(v_report_id, 'The inside cover has my initials and a blue library stamp.');
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
+
+  IF (SELECT count(*) FROM public.list_my_item_claims()) <> 1 THEN
+    RAISE EXCEPTION 'Reporter could not see the private ownership claim';
+  END IF;
+  PERFORM public.review_item_claim(v_claim_id, 'verified');
+  IF NOT EXISTS (SELECT 1 FROM public.item_reports WHERE id = v_report_id AND status = 'handed_over') THEN
+    RAISE EXCEPTION 'Verified item claim did not resolve the Lost and Found report';
+  END IF;
+
+  INSERT INTO public.events (college_id, title, description, location, start_date, end_date, max_capacity, organizer_id, status)
+  SELECT college_id, 'Test Campus Event', 'Registration capacity test', 'Auditorium',
+    now() + interval '7 days', now() + interval '7 days 2 hours', 1, id, 'published'
+  FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000001'
+  RETURNING id INTO v_event_id;
+
+  IF public.register_for_campus_event(v_event_id) <> 'registered' THEN
+    RAISE EXCEPTION 'First event registration was not confirmed';
+  END IF;
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000002', false);
+  IF public.register_for_campus_event(v_event_id) <> 'waitlisted' THEN
+    RAISE EXCEPTION 'Event capacity did not place the second user on the waitlist';
+  END IF;
+
 END;
 $$;
 
