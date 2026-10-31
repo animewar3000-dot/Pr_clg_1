@@ -7,9 +7,9 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 INSERT INTO public.colleges (name, code, email_domain)
 VALUES ('CampOS Test College', 'CAMPTEST', 'campus.example.test');
 
-INSERT INTO auth.users (id, email, raw_user_meta_data) VALUES
-('00000000-0000-4000-8000-000000000001', 'admin@campus.example.test', '{"display_name":"Test Admin","college_code":"CAMPTEST"}'),
-('00000000-0000-4000-8000-000000000002', 'student@campus.example.test', '{"display_name":"Test Student","college_code":"CAMPTEST"}');
+INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data) VALUES
+('00000000-0000-4000-8000-000000000001', 'admin@campus.example.test', now(), '{"display_name":"Test Admin","college_code":"CAMPTEST"}'),
+('00000000-0000-4000-8000-000000000002', 'student@campus.example.test', now(), '{"display_name":"Test Student","college_code":"CAMPTEST"}');
 
 DO $$
 BEGIN
