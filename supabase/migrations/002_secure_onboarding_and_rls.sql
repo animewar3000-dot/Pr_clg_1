@@ -1058,3 +1058,73 @@ BEGIN
 END;
 $$;
 
+
+
+-- Capacity-safe event registration with a transaction-scoped lock.
+CREATE OR REPLACE FUNCTION public.register_for_campus_event(p_event_id uuid)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, app_private, pg_temp
+AS $$
+DECLARE
+  v_college_id uuid;
+  v_event public.events%ROWTYPE;
+  v_registered_count integer;
+  v_status text;
+BEGIN
+  v_college_id := app_private.current_college_id();
+  IF auth.uid() IS NULL OR v_college_id IS NULL
+     OR NOT app_private.is_active_college_member(v_college_id) THEN
+    RAISE EXCEPTION 'An active campus account is required';
+  END IF;
+
+  PERFORM pg_advisory_xact_lock(hashtext(p_event_id::text));
+
+  SELECT * INTO v_event
+  FROM public.events
+  WHERE id = p_event_id
+    AND college_id = v_college_id
+    AND status = 'published'
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Published campus event not found';
+  END IF;
+  IF v_event.registration_deadline IS NOT NULL AND v_event.registration_deadline < now() THEN
+    RAISE EXCEPTION 'Event registration has closed';
+  END IF;
+  IF v_event.start_date <= now() THEN
+    RAISE EXCEPTION 'This event has already started';
+  END IF;
+
+  SELECT status INTO v_status
+  FROM public.event_registrations
+  WHERE event_id = p_event_id AND user_id = auth.uid();
+
+  IF v_status IN ('registered','waitlisted') THEN
+    RETURN v_status;
+  END IF;
+
+  SELECT count(*) INTO v_registered_count
+  FROM public.event_registrations
+  WHERE event_id = p_event_id AND status = 'registered';
+
+  IF v_event.max_capacity IS NULL OR v_registered_count < v_event.max_capacity THEN
+    v_status := 'registered';
+  ELSE
+    v_status := 'waitlisted';
+  END IF;
+
+  INSERT INTO public.event_registrations (event_id, user_id, status)
+  VALUES (p_event_id, auth.uid(), v_status)
+  ON CONFLICT (event_id, user_id)
+  DO UPDATE SET status = EXCLUDED.status, registered_at = now();
+
+  RETURN v_status;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.register_for_campus_event(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.register_for_campus_event(uuid) TO authenticated;
+
