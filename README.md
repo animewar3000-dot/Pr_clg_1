@@ -28,13 +28,20 @@ CampOS is a comprehensive digital campus management and student community platfo
 
 ## Product status
 
-CampOS is under active development. The public landing page, authentication UI, application shell and first dashboard data queries are implemented. The database schema is an initial draft and must be reviewed/applied against the target Supabase project. Several modules are UI foundations and are not yet verified end-to-end. Do not use this deployment with real student data until the security and RLS checklist is completed.
+CampOS is under active development. The public landing page, authentication UI, application shell and first dashboard data queries are implemented. The database schema is an initial draft and must be reviewed/applied against the target Supabase project. Several modules are UI foundations and are not yet verified end-to-end. Do not use this deployment with real student data until the security and RLS checklist in supabase/SECURITY_TEST_MATRIX.md is completed against the live Supabase project.
 
 ### Implemented frontend surfaces
 
 - Public landing page and responsive navigation
 - Login, registration, password recovery and password reset screens
 - Student dashboard with Supabase-backed announcements, notifications and room-membership queries
+- Private direct messages, campus directory search and room creation RPCs
+- Academic resources with private Storage and short-lived signed downloads
+- Lost & Found claims and reporter verification
+- Capacity-aware event registration and waitlists
+- Faculty assignment publishing, student submissions and grading
+- Authorized college-wide announcement publishing
+- Admin verification queue with verified-email approval
 - Initial page surfaces for rooms, messaging, resources, Lost & Found, Request Desk, announcements, events, clubs, marketplace, study groups, timetable, feedback, administration and AI
 
 ### Planned / incomplete production workflows
