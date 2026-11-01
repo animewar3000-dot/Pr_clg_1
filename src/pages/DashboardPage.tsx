@@ -204,7 +204,7 @@ export function DashboardPage() {
           <PanelHeading eyebrow="KEEP AN EYE ON" title="Unread notifications" />
           <div className="mt-5">
             {notificationsQuery.isLoading ? <LoadingRows /> : notificationsQuery.isError ? (
-              <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Notifications could not be loaded. Refresh the page or check your connection.</div>
+              <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">Notifications are temporarily unavailable while campus data access is being configured.</div>
             ) : notificationsQuery.data?.length ? (
               <div className="space-y-3">
                 {notificationsQuery.data.map(notification => (
@@ -228,7 +228,7 @@ export function DashboardPage() {
           <PanelHeading eyebrow="FROM YOUR COLLEGE" title="Recent announcements" href="/announcements" linkLabel="View all" />
           <div className="mt-5">
             {announcementsQuery.isLoading ? <LoadingRows /> : announcementsQuery.isError ? (
-              <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Announcements could not be loaded. Refresh the page or check your connection.</div>
+              <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Announcements are temporarily unavailable while campus data access is being configured.</div>
             ) : announcementsQuery.data?.length ? (
               <div className="space-y-3">
                 {announcementsQuery.data.map(announcement => (
@@ -257,7 +257,7 @@ export function DashboardPage() {
         <PanelHeading eyebrow="YOUR COMMUNITY" title="Rooms you belong to" href="/rooms" linkLabel="Explore rooms" />
         <div className="mt-5">
           {roomsQuery.isLoading ? <LoadingRows /> : roomsQuery.isError ? (
-            <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Your room memberships could not be loaded. Refresh the page or check your connection.</div>
+            <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Room memberships are temporarily unavailable while campus data access is being configured.</div>
           ) : rooms.length ? (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {rooms.map(room => (
