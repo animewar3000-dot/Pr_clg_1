@@ -6,7 +6,7 @@ import {
   ArrowUpRight, Bell, BookOpen, Bot, CalendarDays, ChevronLeft, ClipboardList,
   ChevronRight, Clock3, Command, GraduationCap,
   Heart, LayoutDashboard, LogOut, Menu, MessageCircle, MessageSquare,
-  Plus, Search, ShieldCheck, ShoppingBag, Users, Wrench, X,
+  Plus, Search, ShieldCheck, ShoppingBag, Users, Wrench, X, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { BrandMark } from './BrandMark';
@@ -205,6 +205,27 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <motion.button
+        type="button"
+        onClick={() => navigate('/ai-assistant')}
+        initial={{ opacity: 0, y: 18 }}
+        animate={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 1, y: [0, -5, 0] }}
+        transition={reducedMotion ? { duration: 0.2 } : { y: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' }, opacity: { duration: 0.25 } }}
+        whileHover={reducedMotion ? undefined : { scale: 1.06, rotate: -3 }}
+        whileTap={{ scale: 0.94 }}
+        className="group fixed bottom-[82px] right-3 z-40 flex items-end gap-2 rounded-full border border-[#172B4D]/10 bg-white/95 p-2 pr-3 shadow-[0_12px_36px_rgba(23,43,77,.2)] backdrop-blur sm:bottom-6 sm:right-6"
+        aria-label="Chat with Robo, your CampOS AI companion"
+      >
+        <span className="relative grid h-14 w-14 place-items-center rounded-full bg-[#172B4D] ring-2 ring-white sm:h-16 sm:w-16">
+          <img src="/robo.svg" alt="" className="h-full w-full object-contain" />
+          <span className="absolute right-0 top-0 h-3 w-3 rounded-full border-2 border-white bg-[#14A89C]" />
+        </span>
+        <span className="pb-1 text-left">
+          <span className="block text-xs font-black text-[#172B4D]">Robo</span>
+          <span className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-slate-500"><Sparkles size={10} className="text-[#386BE8]"/> Ask me anything</span>
+        </span>
+      </motion.button>
 
       <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[#172B4D]/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 backdrop-blur lg:hidden">
         {[
