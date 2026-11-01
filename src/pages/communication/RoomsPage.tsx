@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { roomCreateSchema } from '../../lib/validations';
-import { Plus, Search, Users } from 'lucide-react';
+import { Plus, Search, Users, ShieldAlert, Sparkles } from 'lucide-react';
 import type { Room } from '../../lib/types';
 import type { z } from 'zod';
 
@@ -82,16 +82,16 @@ export function RoomsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-[camp-fade-up_.45s_ease-out_both]">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Campus Rooms</h1>
-        <button onClick={() => setShowCreate(!showCreate)} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2">
+        <div><p className="text-[10px] font-black tracking-[.2em] text-[#386BE8]">FIND YOUR PEOPLE</p><h1 className="mt-1 text-2xl font-extrabold text-[#172B4D] sm:text-3xl">Campus Rooms</h1><p className="mt-1 text-sm text-slate-500">Shared spaces for classes, projects and campus communities.</p></div>
+        <button onClick={() => setShowCreate(!showCreate)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#386BE8] px-4 py-2.5 text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/20 transition hover:-translate-y-0.5 hover:bg-[#2859CB]">
           <Plus className="h-4 w-4" /> Create Room
         </button>
       </div>
 
       {showCreate && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="rounded-2xl border border-[#172B4D]/10 bg-white p-5 shadow-[0_12px_35px_rgba(23,43,77,.06)] sm:p-6">
           <h2 className="text-lg font-semibold mb-4">Create a New Room</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
@@ -138,27 +138,27 @@ export function RoomsPage() {
           placeholder="Search rooms..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-2xl border border-[#172B4D]/10 bg-white py-3 pl-10 pr-4 text-sm text-[#172B4D] shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#386BE8] focus:ring-4 focus:ring-[#386BE8]/10"
         />
       </div>
 
-      {createMutation.isError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{createMutation.error instanceof Error ? createMutation.error.message : 'Room could not be created.'}</p>}
+      {createMutation.isError && <p role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{createMutation.error instanceof Error ? createMutation.error.message : 'Room could not be created.'}</p>}
       {joinMutation.isError && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{joinMutation.error instanceof Error ? joinMutation.error.message : 'Could not join room.'}</p>}
       {roomsError || membershipsError ? (
-        <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">Campus rooms could not be loaded. Check your account approval and Supabase policies.</p>
+        <p role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Campus rooms are temporarily unavailable. The campus database or your account permissions still need setup. Your rooms will appear here once access is configured.</p>
       ) : isLoading ? (
         <div className="text-center py-8 text-gray-500">Loading rooms...</div>
       ) : !rooms || rooms.length === 0 ? (
-        <div className="text-center py-12 bg-white border border-gray-200 rounded-lg">
+        <div className="rounded-2xl border border-dashed border-[#172B4D]/15 bg-white px-5 py-12 text-center">
           <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No rooms found. Create one to get started!</p>
+          <p className="mt-4 font-extrabold text-[#172B4D]">Your campus is ready for its first room</p><p className="mt-1 text-sm text-slate-500">Create a class space, project group or interest community.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {rooms.map((room) => {
             const isMember = myRoomIds?.includes(room.id);
             return (
-              <div key={room.id} className="bg-white border border-gray-200 rounded-lg p-4">
+              <div key={room.id} className="group rounded-2xl border border-[#172B4D]/10 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-[#386BE8]/30 hover:shadow-xl hover:shadow-[#172B4D]/5">
                 <Link to={`/rooms/${room.id}`} className="font-semibold text-gray-900 hover:text-blue-600">{room.name}</Link>
                 <p className="text-sm text-gray-500 mt-1 line-clamp-2">{room.description || 'No description'}</p>
                 <div className="flex items-center justify-between mt-3">
