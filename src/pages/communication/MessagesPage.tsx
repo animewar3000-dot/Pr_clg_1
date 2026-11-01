@@ -201,7 +201,7 @@ export function MessagesPage() {
           {conversationsQuery.isLoading ? (
             <div className="space-y-3 p-4">{[0, 1, 2].map(item => <div key={item} className="h-14 animate-pulse rounded-xl bg-slate-100" />)}</div>
           ) : conversationsQuery.isError ? (
-            <p role="alert" className="p-4 text-sm text-red-600">Could not load conversations. {conversationsQuery.error instanceof Error ? conversationsQuery.error.message : ''}</p>
+            <p role="alert" className="m-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">Conversations are temporarily unavailable while campus data access is being configured. {conversationsQuery.error instanceof Error ? conversationsQuery.error.message : ''}</p>
           ) : conversations.length ? (
             conversations.map(conversation => (
               <button
@@ -257,7 +257,7 @@ export function MessagesPage() {
               {messagesQuery.isLoading ? (
                 <p className="py-8 text-center text-sm text-slate-500">Loading messages…</p>
               ) : messagesQuery.isError ? (
-                <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">Messages could not be loaded. Check conversation membership and database policies.</p>
+                <p role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">Messages are temporarily unavailable. Campus database setup and conversation permissions must be completed first.</p>
               ) : messagesQuery.data?.length ? (
                 messagesQuery.data.map(message => (
                   <div key={message.id} className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
