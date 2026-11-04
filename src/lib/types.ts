@@ -117,7 +117,8 @@ export interface Subject {
 export interface Profile {
   id: string; // auth.uid()
   college_id: string;
-  campus_id: string;
+  campus_id: string | null;
+  college_student_id: string | null;
   display_name: string;
   email: string;
   avatar_url: string | null;
