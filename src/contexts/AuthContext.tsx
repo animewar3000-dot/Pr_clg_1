@@ -18,7 +18,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string, collegeCode: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string, collegeCode: string, collegeStudentId: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
@@ -144,14 +144,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, displayName: string, collegeCode: string) => {
+  const signUp = async (email: string, password: string, displayName: string, collegeCode: string, collegeStudentId: string) => {
     const supabase = getSupabase();
     if (!supabase) throw new Error('Supabase not configured');
     setState(prev => ({ ...prev, error: null }));
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName, college_code: collegeCode.trim().toUpperCase() } },
+      options: { data: { display_name: displayName, college_code: collegeCode.trim().toUpperCase(), college_student_id: collegeStudentId.trim().toUpperCase() } },
     });
     if (error) {
       setState(prev => ({ ...prev, error: error.message }));
