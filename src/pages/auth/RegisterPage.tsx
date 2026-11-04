@@ -22,7 +22,7 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.displayName, data.collegeCode);
+      await signUp(data.email, data.password, data.displayName, data.collegeCode, data.collegeStudentId);
       setSuccess(true);
     } catch {
       // Authentication errors are displayed by AuthContext.
@@ -33,7 +33,7 @@ export function RegisterPage() {
 
   if (success) {
     return (
-      <AuthLayout eyebrow="REGISTRATION RECEIVED" title="Your next chapter starts soon." description="Your account request has been submitted. Follow the verification instructions sent to your college email.">
+      <AuthLayout eyebrow="REGISTRATION RECEIVED" title="Your next chapter starts soon." description="Your account request has been submitted. Verify your email and wait for college approval.">
         <div className="rounded-2xl border border-[#14A89C]/25 bg-[#E6F5F1] p-5">
           <div className="text-3xl font-black text-[#16846F]">✓</div>
           <h2 className="mt-3 text-lg font-extrabold text-[#172B4D]">Check your college inbox</h2>
@@ -45,7 +45,7 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout eyebrow="CREATE YOUR CAMPUS IDENTITY" title="Start with your details." description="Use the details your college can verify. Your unique CampOS ID is generated after approval.">
+    <AuthLayout eyebrow="CREATE YOUR CAMPUS IDENTITY" title="Start with your details." description="Register with your official college details. Your student ID is checked during college verification.">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {authError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
         <div>
@@ -54,14 +54,19 @@ export function RegisterPage() {
           {errors.displayName && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.displayName.message}</p>}
         </div>
         <div>
-          <label htmlFor="email" className="text-sm font-bold text-[#172B4D]">College email</label>
-          <input id="email" type="email" autoComplete="email" {...register('email')} className={fieldClass} placeholder="you@college.edu" aria-invalid={Boolean(errors.email)} />
+          <label htmlFor="email" className="text-sm font-bold text-[#172B4D]">Email address (personal or college)</label>
+          <input id="email" type="email" autoComplete="email" {...register('email')} className={fieldClass} placeholder="you@gmail.com or college email" aria-invalid={Boolean(errors.email)} />
           {errors.email && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.email.message}</p>}
         </div>
         <div>
           <label htmlFor="collegeCode" className="text-sm font-bold text-[#172B4D]">College code</label>
           <input id="collegeCode" autoComplete="off" {...register('collegeCode')} className={fieldClass} placeholder="Your official college code" aria-invalid={Boolean(errors.collegeCode)} />
           {errors.collegeCode && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.collegeCode.message}</p>}
+        </div>
+        <div>
+          <label htmlFor="collegeStudentId" className="text-sm font-bold text-[#172B4D]">College Student ID / Enrollment Number</label>
+          <input id="collegeStudentId" autoComplete="off" {...register("collegeStudentId")} className={fieldClass} placeholder="e.g. BT260047CS" aria-invalid={Boolean(errors.collegeStudentId)} />
+          {errors.collegeStudentId && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.collegeStudentId.message}</p>}
         </div>
         <div>
           <label htmlFor="password" className="text-sm font-bold text-[#172B4D]">Password</label>
