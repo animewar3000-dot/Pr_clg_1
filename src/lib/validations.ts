@@ -12,6 +12,7 @@ export const registerSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   displayName: z.string().min(2, 'Name must be at least 2 characters').max(100),
   collegeCode: z.string().min(1, 'College code is required'),
+  collegeStudentId: z.string().trim().min(3, 'College student ID is required').max(40, 'Student ID is too long'),
 });
 
 export const passwordResetSchema = z.object({
