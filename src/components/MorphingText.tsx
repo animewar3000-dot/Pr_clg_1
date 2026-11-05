@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
 const MORPH_TIME = 1.25;
@@ -122,7 +122,7 @@ function SvgFilters() {
 
 export function MorphingText({ texts, className = '', label }: MorphingTextProps) {
   const reducedMotion = useReducedMotion();
-  const safeTexts = texts.filter(text => text.trim().length > 0);
+  const safeTexts = useMemo(() => texts.filter(text => text.trim().length > 0), [texts]);
   const { text1Ref, text2Ref } = useMorphingText(safeTexts, Boolean(reducedMotion));
 
   if (!safeTexts.length) return null;
