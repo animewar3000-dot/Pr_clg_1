@@ -114,7 +114,7 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-[#F8F5EC] text-[#13171F]">
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-white/10 bg-[#172B4D] text-white transition-[width] duration-200 lg:flex ${collapsed ? 'w-[88px]' : 'w-[264px]'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-white/10 bg-[#172B4D] text-white shadow-[8px_0_32px_rgba(15,32,58,.08)] transition-[width] duration-300 ease-out lg:flex ${collapsed ? 'w-[84px]' : 'w-[264px]'}`}>
         <SidebarContent
           collapsed={collapsed}
           isAdmin={isAdmin}
@@ -206,7 +206,7 @@ export function Layout() {
         </main>
       </div>
 
-      <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[#172B4D]/10 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 backdrop-blur lg:hidden">
+      <nav aria-label="Mobile primary navigation" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[#172B4D]/10 bg-white/95 px-1.5 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 shadow-[0_-8px_30px_rgba(23,43,77,.06)] backdrop-blur-xl lg:hidden">
         {[
           { name: 'Home', href: '/dashboard', icon: LayoutDashboard },
           { name: 'Rooms', href: '/rooms', icon: Users },
@@ -293,8 +293,8 @@ function SidebarContent({
           <BrandMark inverse compact size="md" />
           {!collapsed && <div className="min-w-0"><p className="truncate text-base font-black tracking-tight text-white">CampOS</p><p className="text-[9px] font-bold tracking-[.16em] text-white/50">CAMPUS OPERATING SYSTEM</p></div>}
         </div>
-        <button type="button" onClick={onCollapse} className={`hidden rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white ${collapsed ? 'lg:hidden' : 'lg:block'}`} aria-label="Collapse sidebar"><ChevronLeft size={17} /></button>
-        {collapsed && <button type="button" onClick={onCollapse} className="hidden rounded-lg p-1 text-white/60 hover:bg-white/10 hover:text-white lg:block" aria-label="Expand sidebar"><ChevronRight size={17} /></button>}
+        <button type="button" onClick={onCollapse} className={`hidden rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white ${collapsed ? 'lg:hidden' : 'lg:block'}`} aria-label="Collapse sidebar" aria-expanded={!collapsed}><ChevronLeft size={17} /></button>
+        {collapsed && <button type="button" onClick={onCollapse} className="hidden rounded-lg p-1 text-white/60 hover:bg-white/10 hover:text-white lg:block" aria-label="Expand sidebar" aria-expanded={collapsed}><ChevronRight size={17} /></button>}
       </div>
       <SidebarNavigation collapsed={collapsed} isAdmin={isAdmin} />
       <SidebarAccount collapsed={collapsed} userLabel={userLabel} campusId={campusId} onSignOut={onSignOut} />
