@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
 import { getSupabase } from '../../lib/supabase';
-import { Bot, Send, AlertCircle, Sparkles, GraduationCap, BookOpen, Lightbulb, Compass, Copy, Check, RotateCcw } from 'lucide-react';
+import { Bot, Send, AlertCircle, Sparkles, GraduationCap, BookOpen, Lightbulb, Copy, Check, RotateCcw } from 'lucide-react';
 import type { AIChatMessage } from '../../lib/types';
 
 type MarkdownBlock =
@@ -246,7 +246,7 @@ export function AIAssistantPage() {
                   {msg.role === 'assistant' ? <AssistantMessage content={msg.content} /> : <p className="whitespace-pre-wrap">{msg.content}</p>}
                   {msg.role === 'assistant' && (
                     <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2">
-                      <span className="text-[10px] font-semibold tracking-wide text-slate-400">PICO · CAMPos AI</span>
+                      <span className="text-[10px] font-semibold tracking-wide text-slate-400">PICO · CAMPOS AI</span>
                       <button type="button" onClick={() => copyMessage(msg.content, i)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-700" aria-label="Copy response">
                         {copiedIndex === i ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
                         {copiedIndex === i ? 'Copied' : 'Copy'}
