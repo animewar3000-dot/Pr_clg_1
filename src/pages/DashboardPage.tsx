@@ -7,6 +7,7 @@ import {
   FileText, MessageSquare, Search, Users, Wrench,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { ScrollReveal } from '../components/ScrollReveal';
 import { getSupabase } from '../lib/supabase';
 
 type NotificationRecord = {
@@ -66,6 +67,7 @@ function PanelHeading({ eyebrow, title, href, linkLabel }: { eyebrow: string; ti
         <h2 className="mt-2 text-xl font-extrabold tracking-tight text-[#172B4D]">{title}</h2>
       </div>
       {href && linkLabel && <Link to={href} className="inline-flex items-center gap-1 text-xs font-extrabold text-[#386BE8] transition hover:gap-2">{linkLabel} <ArrowRight size={14} /></Link>}
+      </ScrollReveal>
     </div>
   );
 }
@@ -180,6 +182,7 @@ export function DashboardPage() {
         </div>
       </motion.section>
 
+      <ScrollReveal>
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
           <div><p className="text-[10px] font-black tracking-[.18em] text-[#386BE8]">CAMPUS TOOLKIT</p><h2 className="mt-2 text-xl font-extrabold text-[#172B4D]">Jump back in</h2></div>
@@ -198,7 +201,9 @@ export function DashboardPage() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
       <section className="grid gap-5 xl:grid-cols-2">
         <div className="rounded-2xl border border-[#172B4D]/10 bg-white p-5 shadow-sm sm:p-6">
           <PanelHeading eyebrow="KEEP AN EYE ON" title="Unread notifications" />
@@ -252,7 +257,9 @@ export function DashboardPage() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
       <section className="rounded-2xl border border-[#172B4D]/10 bg-white p-5 shadow-sm sm:p-6">
         <PanelHeading eyebrow="YOUR COMMUNITY" title="Rooms you belong to" href="/rooms" linkLabel="Explore rooms" />
         <div className="mt-5">
