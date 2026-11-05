@@ -213,13 +213,13 @@ export function Layout() {
           { name: 'Inbox', href: '/messages', icon: MessageSquare },
           { name: 'Library', href: '/resources', icon: BookOpen },
         ].map(item => (
-          <NavLink key={item.href} to={item.href} className={({ isActive }) => `flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-extrabold ${isActive ? 'text-[#386BE8]' : 'text-slate-400'}`}>
-            <item.icon size={18} />
+          <NavLink key={item.href} to={item.href} className={({ isActive }) => `flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-extrabold ${isActive ? 'text-[#386BE8]' : 'text-slate-400'}`}>
+            <item.icon size={20} />
             {item.name}
           </NavLink>
         ))}
-        <button type="button" onClick={() => setMobileOpen(true)} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-extrabold text-slate-400">
-          <Menu size={18} /> More
+        <button type="button" onClick={() => setMobileOpen(true)} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-extrabold text-slate-400">
+          <Menu size={20} /> More
         </button>
       </nav>
 
