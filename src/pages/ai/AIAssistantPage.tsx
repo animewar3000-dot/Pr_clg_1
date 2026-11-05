@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
-import { config } from '../../lib/config';
+import { getSupabase } from '../../lib/supabase';
 import { Bot, Send, AlertCircle } from 'lucide-react';
 import type { AIChatMessage } from '../../lib/types';
 
 export function AIAssistantPage() {
   const [messages, setMessages] = useState<AIChatMessage[]>([
-    { role: 'assistant', content: 'Hello! I\'m the CampOS AI Assistant. I can help you with academic questions, campus information, finding resources, and more. How can I help you today?' }
+    { role: 'assistant', content: "Hello! I'm the CampOS AI Assistant. I can help with academic questions, study planning, and general campus-life guidance. How can I help you today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [serviceError, setServiceError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isAIConfigured = config.ai.enabled;
+  const supabase = getSupabase();
+  const isAIConfigured = Boolean(supabase);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -18,42 +20,40 @@ export function AIAssistantPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    const text = input.trim();
+    if (!text || isLoading) return;
 
-    const userMessage: AIChatMessage = { role: 'user', content: input.trim() };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage: AIChatMessage = { role: 'user', content: text };
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
     setInput('');
+    setServiceError('');
     setIsLoading(true);
 
-    if (!isAIConfigured) {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'AI services are not currently configured. To enable the AI assistant, the administrator needs to configure an AI provider (OpenAI, Anthropic, etc.) with proper API credentials. Please contact your college administrator.'
-      }]);
+    if (!supabase) {
+      setServiceError('Connect CampOS to Supabase before using the AI assistant.');
       setIsLoading(false);
       return;
     }
 
     try {
-      // In a real implementation, this would call a backend edge function
-      // that performs RAG retrieval and generates a response
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      const { data, error } = await supabase.functions.invoke('campus-ai', {
+        body: {
+          messages: nextMessages.slice(-10).map(({ role, content }) => ({ role, content })),
+        },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(prev => [...prev, { role: 'assistant', content: data.message, sources: data.sources }]);
-      } else {
-        throw new Error('AI service unavailable');
+      if (error) throw error;
+      if (typeof data?.message !== 'string' || !data.message.trim()) {
+        throw new Error(data?.error || 'The AI service returned an invalid response.');
       }
-    } catch {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'I\'m sorry, I\'m having trouble connecting to the AI service right now. Please try again later, or contact your administrator if the issue persists.'
-      }]);
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.message }]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown service error';
+      setServiceError(message.includes('FunctionsFetchError')
+        ? 'Could not reach the CampOS AI service. It may not be deployed or configured yet.'
+        : 'The AI assistant is temporarily unavailable. Please try again in a moment.');
     } finally {
       setIsLoading(false);
     }
@@ -66,21 +66,19 @@ export function AIAssistantPage() {
         <h1 className="text-2xl font-bold text-gray-900">AI Assistant</h1>
       </div>
 
-      {!isAIConfigured && (
+      {(!isAIConfigured || serviceError) && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-yellow-800">AI Not Configured</p>
+            <p className="text-sm font-medium text-yellow-800">AI Service Setup</p>
             <p className="text-sm text-yellow-700 mt-1">
-              The AI assistant requires backend configuration with an AI provider. 
-              The chat interface is available for testing, but responses require proper API integration.
+              {serviceError || 'The AI assistant needs a configured Supabase connection and a deployed campus-ai function with the Groq API key stored as a server-side secret.'}
             </p>
           </div>
         </div>
       )}
 
       <div className="bg-white border border-gray-200 rounded-lg flex flex-col h-[60vh]">
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -111,21 +109,22 @@ export function AIAssistantPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <form onSubmit={handleSend} className="p-4 border-t border-gray-200">
           <div className="flex gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything about campus, academics, or resources..."
+              placeholder="Ask about studies, campus life, or academic concepts..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
+              maxLength={4000}
             />
             <button
               type="submit"
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || !isAIConfigured}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              aria-label="Send message"
             >
               <Send className="h-5 w-5" />
             </button>
