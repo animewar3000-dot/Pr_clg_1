@@ -187,13 +187,13 @@ export function DashboardPage() {
           <div><p className="text-[10px] font-black tracking-[.18em] text-[#386BE8]">CAMPUS TOOLKIT</p><h2 className="mt-2 text-xl font-extrabold text-[#172B4D]">Jump back in</h2></div>
           <p className="hidden text-xs font-medium text-slate-500 sm:block">Shortcuts to the places you use most.</p>
         </div>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className="campos-toolkit-grid grid grid-cols-2 gap-3 min-[1024px]:grid-cols-3 xl:grid-cols-6">
           {quickActions.map((action, index) => (
             <motion.div key={action.href} initial={reducedMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .3, delay: reducedMotion ? 0 : index * .035 }}>
-              <Link to={action.href} className="group flex h-full min-h-[150px] flex-col rounded-2xl border border-[#172B4D]/10 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-[#386BE8]/30 hover:shadow-lg hover:shadow-[#172B4D]/5">
-                <span className={`grid h-10 w-10 place-items-center rounded-xl ${toneClasses[action.tone]}`}><action.icon size={19} /></span>
-                <span className="mt-5 text-sm font-extrabold text-[#172B4D]">{action.name}</span>
-                <span className="mt-1 text-xs leading-5 text-slate-500">{action.description}</span>
+              <Link to={action.href} className="group flex h-full min-h-[178px] min-w-0 flex-col rounded-2xl border border-[#172B4D]/10 bg-white p-4 shadow-sm sm:min-h-[188px] sm:p-5 transition hover:-translate-y-1 hover:border-[#386BE8]/30 hover:shadow-lg hover:shadow-[#172B4D]/5">
+                <span className={`grid h-11 w-11 place-items-center rounded-xl ${toneClasses[action.tone]} sm:h-12 sm:w-12`}><action.icon size={21} /></span>
+                <span className="mt-4 text-sm font-extrabold leading-snug text-[#172B4D] sm:text-base">{action.name}</span>
+                <span className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">{action.description}</span>
                 <ArrowRight size={15} className="mt-auto translate-x-0 text-[#386BE8] opacity-0 transition group-hover:translate-x-1 group-hover:opacity-100" />
               </Link>
             </motion.div>
