@@ -155,7 +155,7 @@ button:disabled {
     padding-right: max(.75rem, env(safe-area-inset-right));
   }
 
-  .campos-main form .grid-cols-2 {
+  .campos-main .grid-cols-2:not(.campos-toolkit-grid) {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
