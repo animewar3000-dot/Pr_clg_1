@@ -7,16 +7,12 @@ type BrandMarkProps = HTMLAttributes<HTMLSpanElement> & {
 };
 
 const sizeClasses = {
-  sm: 'h-9 w-12 rounded-lg',
-  md: 'h-11 w-[3.7rem] rounded-xl',
-  lg: 'h-14 w-[4.7rem] rounded-2xl',
+  sm: 'h-9 w-9 rounded-xl',
+  md: 'h-11 w-11 rounded-[15px]',
+  lg: 'h-14 w-14 rounded-[18px]',
 };
 
-/**
- * The single CampOS brand component.
- * Keep every logo instance pointed at the supplied SVG so the mark stays
- * consistent across the landing page, authenticated shell and navigation.
- */
+/** One shared CampOS mark used by the landing page, app shell and auth screens. */
 export function BrandMark({
   compact = false,
   inverse = false,
@@ -26,11 +22,11 @@ export function BrandMark({
 }: BrandMarkProps) {
   return (
     <span className={`inline-flex min-w-0 shrink-0 items-center gap-3 ${className}`} {...props}>
-      <span className={`relative block shrink-0 overflow-hidden bg-[#F5F5EF] ${sizeClasses[size]} ${inverse ? 'ring-1 ring-white/20' : 'ring-1 ring-[#172B4D]/10'}`}>
+      <span className={`relative block shrink-0 overflow-hidden ${sizeClasses[size]} shadow-[0_6px_18px_rgba(23,43,77,.16)] ring-1 ring-[#172B4D]/10`}>
         <img
           src="/campos-logo.svg"
-          alt="CampOS"
-          className="h-full w-full object-cover"
+          alt="CampOS logo"
+          className="h-full w-full object-contain"
           draggable={false}
         />
       </span>
