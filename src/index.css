@@ -12,7 +12,7 @@
   --camp-ink: #172B4D;
   --camp-blue: #386BE8;
   --camp-mint: #14A89C;
-  --camp-paper: #F8F7F2;
+  --camp-paper: #F7F8FA;
 }
 
 html {
@@ -26,6 +26,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background: var(--camp-paper);
+  overflow-x: clip;
   color: #172B4D;
 }
 
@@ -49,6 +50,20 @@ button:disabled {
 :focus-visible {
   outline: 3px solid #14A89C;
   outline-offset: 3px;
+}
+
+:where(button, a, input, textarea, select) { min-width: 0; }
+:where(input, textarea, select) { max-width: 100%; }
+.page-shell { width: 100%; min-width: 0; }
+.soft-scrollbar { scrollbar-width: thin; scrollbar-color: #9AAAC0 transparent; }
+.soft-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.soft-scrollbar::-webkit-scrollbar-thumb { background: #9AAAC0; border-radius: 99px; }
+
+@media (max-width: 640px) {
+  .mobile-safe-x { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+  .mobile-card { border-radius: 1.15rem !important; }
+  .mobile-scroll-row { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; padding-bottom: .35rem; }
+  .mobile-scroll-row > * { scroll-snap-align: start; }
 }
 
 ::selection {
