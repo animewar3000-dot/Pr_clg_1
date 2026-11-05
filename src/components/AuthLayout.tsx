@@ -15,8 +15,8 @@ export function AuthLayout({ eyebrow, title, description, children }: AuthLayout
   const reducedMotion = useReducedMotion();
 
   return (
-    <main className="min-h-screen bg-[#F8F5EC] px-4 py-6 text-[#13171F] sm:px-8 sm:py-10">
-      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-[#172B4D]/10 bg-white shadow-[0_24px_80px_rgba(23,43,77,.10)] lg:grid-cols-[.92fr_1.08fr]">
+    <main className="min-h-[100svh] bg-[#F7F8FA] px-3 py-3 text-[#13171F] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto grid min-h-[calc(100svh-1.5rem)] max-w-7xl overflow-hidden rounded-[1.4rem] sm:min-h-[calc(100svh-3rem)] sm:rounded-[2rem] border border-[#172B4D]/10 bg-white shadow-[0_24px_80px_rgba(23,43,77,.10)] lg:grid-cols-[.92fr_1.08fr]">
         <section className="relative hidden overflow-hidden bg-[#172B4D] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-14">
           <div className="absolute -right-20 top-20 h-64 w-64 rounded-full bg-[#386BE8]/40 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-[#14A89C]/20 blur-3xl" />
@@ -48,19 +48,19 @@ export function AuthLayout({ eyebrow, title, description, children }: AuthLayout
           <p className="relative z-10 text-xs font-bold tracking-widest text-white/50">SECURE ACCESS / VERIFIED CAMPUS COMMUNITY</p>
         </section>
 
-        <section className="flex items-center justify-center px-2 py-8 sm:px-8 lg:px-12 xl:px-16">
+        <section className="flex min-w-0 items-center justify-center px-4 py-7 sm:px-8 sm:py-10 lg:px-12 xl:px-16">
           <div className="w-full max-w-lg">
-            <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition hover:text-[#386BE8]">
+            <Link to="/" className="mb-7 inline-flex items-center gap-2 sm:mb-10 text-sm font-bold text-slate-500 transition hover:text-[#386BE8]">
               <ArrowLeft size={16} aria-hidden="true" /> Back to CampOS
             </Link>
             <p className="text-xs font-black tracking-[.18em] text-[#386BE8]">{eyebrow}</p>
-            <h1 className="mt-4 text-4xl font-black leading-[1.02] tracking-[-.045em] text-[#13171F] sm:text-5xl">{title}</h1>
+            <h1 className="mt-3 text-[2rem] font-black leading-[1.04] tracking-[-.045em] text-[#13171F] sm:mt-4 sm:text-5xl">{title}</h1>
             <p className="mt-4 max-w-lg leading-7 text-slate-600">{description}</p>
             <motion.div
               initial={reducedMotion ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reducedMotion ? 0 : .4, delay: reducedMotion ? 0 : .08 }}
-              className="mt-8 rounded-3xl border border-[#172B4D]/10 bg-[#F8F5EC] p-5 shadow-sm sm:p-7"
+              className="mt-6 rounded-2xl border border-[#172B4D]/10 bg-[#F5F7FB] p-4 shadow-[0_12px_32px_rgba(23,43,77,.06)] sm:mt-8 sm:rounded-3xl sm:p-7"
             >
               {children}
             </motion.div>
