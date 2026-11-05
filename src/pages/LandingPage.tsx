@@ -59,7 +59,7 @@ export function LandingPage() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#F8F5EC] text-[#13171F]">
+    <main className="min-h-screen overflow-x-clip bg-[#F8F5EC] text-[#13171F]">
       <header className="sticky top-0 z-40 border-b border-[#172B4D]/10 bg-[#F8F5EC]/95 backdrop-blur">
         <nav aria-label="Main navigation" className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-3 px-4 sm:h-[76px] sm:px-8">
           <Link to="/" className="flex min-w-0 scale-[.92] origin-left items-center gap-3 sm:scale-100" aria-label="CampOS home">
@@ -111,71 +111,84 @@ export function LandingPage() {
           </div>
         </div>
 
-        <motion.div initial={reducedMotion ? false : { opacity: 0, scale: .96, rotate: 1.4 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: reducedMotion ? 0 : .7, ease: 'easeOut' }} className="relative mx-auto w-full max-w-[620px]">
-          <div className="absolute -left-6 top-10 h-32 w-32 rounded-full bg-[#F5A82E]/30 blur-2xl" />
-          <div className="absolute -right-6 bottom-8 h-40 w-40 rounded-full bg-[#14A89C]/25 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border-[3px] border-[#13171F] bg-[#172B4D] p-5 shadow-[12px_14px_0_#13171F] sm:p-7">
-            <div className="absolute right-7 top-7 grid grid-cols-7 gap-2 opacity-30" aria-hidden="true">
-              {Array.from({ length: 35 }).map((_, i) => <span key={i} className="h-1.5 w-1.5 rounded-full bg-white" />)}
+        <motion.div
+          initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : .55, ease: 'easeOut', delay: reducedMotion ? 0 : .12 }}
+          className="relative mx-auto w-full max-w-[540px]"
+        >
+          <div className="pointer-events-none absolute -left-8 top-14 h-28 w-28 rounded-full bg-[#F5A82E]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -right-8 bottom-8 h-36 w-36 rounded-full bg-[#14A89C]/15 blur-3xl" />
+          <div className="relative rounded-[1.6rem] border border-[#172B4D]/10 bg-white p-3 shadow-[0_22px_60px_rgba(23,43,77,.12)] sm:rounded-[1.9rem] sm:p-5">
+            <div className="flex items-center justify-between gap-3 px-1 pb-3 sm:px-2 sm:pb-4">
+              <BrandMark size="sm" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#172B4D]/10 bg-[#F7F8FA] px-3 py-1.5 text-[9px] font-extrabold tracking-[.12em] text-slate-500 sm:text-[10px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#14A89C]" />
+                CAMPUS SPACE PREVIEW
+              </span>
             </div>
-            <div className="relative flex items-center justify-between">
-              <span className="rounded-lg bg-[#F5A82E] px-3 py-2 text-[10px] font-black tracking-[.13em] text-[#13171F]">CAMPUS LIFE / VOL. 01</span>
-              <span className="text-xs font-black tracking-widest text-white/60">CIQ — 001</span>
-            </div>
-            <div className="relative mt-8 max-w-[400px] text-white">
-              <p className="text-[clamp(2.8rem,5vw,4.6rem)] font-black uppercase leading-[.88] tracking-[-.05em]">Find your<br />campus crew<span className="text-[#F5A82E]">.</span></p>
-              <p className="mt-4 max-w-sm text-sm leading-6 text-white/75">A connected space for conversations, learning and everything happening around campus.</p>
-            </div>
-            <div className="relative mt-8 rounded-2xl border-[2px] border-[#13171F] bg-[#F8F5EC] p-4">
-              <div className="flex items-center justify-between border-b border-[#13171F]/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <BrandMark size="sm" />
-                </div>
-                <span className="rounded-full bg-[#DCE6FF] px-3 py-1 text-[10px] font-black text-[#2859CB]">CONCEPT VIEW</span>
+
+            <div className="rounded-[1.25rem] bg-[#172B4D] p-4 text-white sm:rounded-[1.5rem] sm:p-6">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[9px] font-black tracking-[.18em] text-[#9DB5E8] sm:text-[10px]">YOUR CAMPUS / OVERVIEW</span>
+                <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70">ONE HOME BASE</span>
               </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-[#172B4D]/10 bg-white p-4">
-                  <span className="text-[10px] font-black tracking-widest text-[#386BE8]">COMMUNITY</span>
-                  <p className="mt-2 text-sm font-extrabold text-[#13171F]">Your section room</p>
-                  <p className="mt-1 text-xs text-slate-500">Authorized spaces appear here.</p>
+              <h2 className="mt-5 max-w-sm text-[clamp(1.65rem,5vw,2.55rem)] font-extrabold leading-[1.02] tracking-[-.045em]">
+                Everything campus,<br className="hidden min-[380px]:block" /> in one place<span className="text-[#F5A82E]">.</span>
+              </h2>
+              <p className="mt-3 max-w-sm text-xs leading-5 text-white/65 sm:text-sm sm:leading-6">
+                Your people, academic spaces and everyday campus services—together.
+              </p>
+
+              <div className="mt-5 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-3">
+                <div className="min-w-0 rounded-xl border border-white/10 bg-white/[.07] p-3 sm:p-4">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#386BE8] text-white"><Users size={16} /></span>
+                  <p className="mt-3 text-xs font-bold text-white sm:text-sm">Campus rooms</p>
+                  <p className="mt-1 text-[10px] leading-4 text-white/55 sm:text-xs">Find your people</p>
                 </div>
-                <div className="rounded-xl border border-[#172B4D]/10 bg-white p-4">
-                  <span className="text-[10px] font-black tracking-widest text-[#14A89C]">ACADEMICS</span>
-                  <p className="mt-2 text-sm font-extrabold text-[#13171F]">Resource library</p>
-                  <p className="mt-1 text-xs text-slate-500">Find notes and study material.</p>
+                <div className="min-w-0 rounded-xl border border-white/10 bg-white/[.07] p-3 sm:p-4">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#14A89C] text-[#102C43]"><BookOpen size={16} /></span>
+                  <p className="mt-3 text-xs font-bold text-white sm:text-sm">Resources</p>
+                  <p className="mt-1 text-[10px] leading-4 text-white/55 sm:text-xs">Learn and share</p>
                 </div>
-              </div>
-              <div className="mt-3 rounded-xl border border-[#172B4D]/10 bg-white p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black tracking-widest text-[#386BE8]">CAMPUS UPDATES</span>
-                  <span className="text-[10px] font-bold text-slate-400">LIVE DATA WHEN CONNECTED</span>
+                <div className="min-w-0 rounded-xl border border-white/10 bg-white/[.07] p-3 sm:p-4">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#F5A82E] text-[#172B4D]"><CalendarDays size={16} /></span>
+                  <p className="mt-3 text-xs font-bold text-white sm:text-sm">Campus life</p>
+                  <p className="mt-1 text-[10px] leading-4 text-white/55 sm:text-xs">Events and updates</p>
                 </div>
-                <p className="mt-2 text-sm font-bold text-slate-500">No official notices published yet.</p>
+                <div className="min-w-0 rounded-xl border border-white/10 bg-white/[.07] p-3 sm:p-4">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/15 text-white"><Wrench size={16} /></span>
+                  <p className="mt-3 text-xs font-bold text-white sm:text-sm">Student services</p>
+                  <p className="mt-1 text-[10px] leading-4 text-white/55 sm:text-xs">Get things sorted</p>
+                </div>
               </div>
             </div>
-            <div className="absolute -bottom-4 -right-3 hidden rotate-[-5deg] rounded-xl border-2 border-[#13171F] bg-[#F55C4A] px-4 py-3 text-sm font-black text-white shadow-[4px_5px_0_#13171F] sm:block">YOUR STORY STARTS HERE!</div>
+
+            <div className="flex items-center justify-between gap-3 px-2 pt-3 sm:px-3 sm:pt-4">
+              <span className="text-[9px] font-bold tracking-[.12em] text-slate-400 sm:text-[10px]">CAMPOS / BUILT FOR COLLEGE LIFE</span>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#386BE8] sm:text-xs"><ShieldCheck size={13} /> Permission-aware</span>
+            </div>
           </div>
-          <div className="absolute -left-5 top-1/2 hidden -rotate-6 rounded-xl border-2 border-[#13171F] bg-[#F5A82E] px-4 py-3 text-sm font-black text-[#13171F] shadow-[4px_5px_0_#13171F] md:block">LET'S CONNECT →</div>
         </motion.div>
       </section>
 
-      <section id="features" className="scroll-mt-24 bg-white py-20 sm:py-28">
+      <section id="features" className="scroll-mt-20 bg-white py-14 sm:py-24 lg:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <motion.div {...revealProps} className="max-w-2xl">
             <p className="text-xs font-black tracking-[.18em] text-[#386BE8]">THE CAMPUS TOOLKIT</p>
-            <h2 className="mt-4 text-4xl font-black leading-[.98] tracking-[-.045em] text-[#13171F] sm:text-6xl">Built around your<br />actual campus day.</h2>
-            <p className="mt-5 text-lg leading-8 text-slate-600">Useful campus tools should work together, not make you jump between disconnected places.</p>
+            <h2 className="mt-3 text-3xl font-black leading-[1.02] tracking-[-.045em] text-[#13171F] sm:mt-4 sm:text-6xl">Built around your<br />actual campus day.</h2>
+            <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">Useful campus tools should work together, not make you jump between disconnected places.</p>
           </motion.div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:mt-12 sm:gap-4 lg:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <motion.article key={feature.number} initial={reducedMotion ? false : 'hidden'} whileInView="visible" viewport={{ once: true, amount: .15 }} variants={reveal} transition={{ duration: reducedMotion ? 0 : .45, delay: reducedMotion ? 0 : index * .045 }} className="group rounded-3xl border border-[#172B4D]/10 bg-[#F8F5EC] p-7 transition hover:-translate-y-1 hover:border-[#386BE8]/30 hover:shadow-xl hover:shadow-[#172B4D]/5">
+                <motion.article key={feature.number} initial={reducedMotion ? false : 'hidden'} whileInView="visible" viewport={{ once: true, amount: .15 }} variants={reveal} transition={{ duration: reducedMotion ? 0 : .45, delay: reducedMotion ? 0 : index * .045 }} className="group rounded-2xl border border-[#172B4D]/10 bg-[#F8F5EC] p-5 transition hover:-translate-y-1 sm:rounded-3xl sm:p-7 hover:border-[#386BE8]/30 hover:shadow-xl hover:shadow-[#172B4D]/5">
                   <div className="flex items-center justify-between">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#172B4D] text-white transition group-hover:bg-[#386BE8]"><Icon size={22} aria-hidden="true" /></span>
                     <span className="font-mono text-xs font-bold text-slate-400">{feature.number}</span>
                   </div>
-                  <h3 className="mt-7 text-xl font-extrabold tracking-tight text-[#172B4D]">{feature.title}</h3>
+                  <h3 className="mt-5 text-lg font-extrabold tracking-tight text-[#172B4D] sm:mt-7 sm:text-xl">{feature.title}</h3>
                   <p className="mt-3 leading-7 text-slate-600">{feature.description}</p>
                 </motion.article>
               );
@@ -264,7 +277,7 @@ export function LandingPage() {
 
       <footer className="bg-[#13171F] px-5 py-10 text-white/70 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 sm:flex-row sm:items-center">
-          <div><div className="flex items-center gap-3 text-lg font-black text-white"><span className="grid h-9 w-9 place-items-center rounded-lg bg-[#386BE8] text-white">C</span> CampOS</div><p className="mt-2 text-sm">Your campus. Connected.</p></div>
+          <div><div className="flex items-center gap-3 text-lg font-black text-white"><BrandMark inverse size="sm" /> CampOS</div><p className="mt-2 text-sm">Your campus. Connected.</p></div>
           <div className="flex flex-wrap gap-6 text-sm font-semibold"><a href="#features" className="hover:text-white">Platform</a><a href="#trust" className="hover:text-white">Trust & safety</a><a href="#faq" className="hover:text-white">FAQs</a><Link to="/auth/login" className="hover:text-white">Log in</Link></div>
           <p className="text-xs">© {new Date().getFullYear()} CampOS</p>
         </div>
