@@ -1,231 +1,162 @@
 # CampOS — Campus Operating System
 
-## Overview
+CampOS is a single-college campus management and student community web application built as a college SSPD project. It brings common student, faculty and administration activities into one place.
 
-CampOS is a comprehensive digital campus management and student community platform designed to connect an entire college through a single unified ecosystem. It provides real-time communication, academic resource management, campus services, and AI-powered assistance.
+**Live demo:** https://campos-nu.vercel.app/  
+**Repository:** https://github.com/animewar3000-dot/Pr_clg_1
 
-## Architecture
+> **Project status:** Active student project / demo. Some screens and workflows are still being developed or need live testing. Do not use it for real student records or a full-college rollout until the security checklist has been completed.
 
-```
-┌─────────────────────────────────────────────────┐
-│                  Frontend (React)                │
-│  TypeScript • Vite • Tailwind CSS • TanStack    │
-│  React Router • React Hook Form • Zod           │
-└───────────────────────┬─────────────────────────┘
-                        │ HTTPS
-┌───────────────────────▼─────────────────────────┐
-│              Supabase Backend                    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────┐    │
-│  │   Auth   │ │PostgreSQL│ │   Realtime   │    │
-│  │  (JWT)   │ │  + RLS   │ │ (WebSocket)  │    │
-│  └──────────┘ └──────────┘ └──────────────┘    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────┐    │
-│  │ Storage  │ │  Edge    │ │   pgvector   │    │
-│  │ (Files)  │ │Functions │ │   (AI/RAG)   │    │
-│  └──────────┘ └──────────┘ └──────────────┘    │
-└─────────────────────────────────────────────────┘
-```
+## What CampOS includes
 
-## Product status
+The frontend contains these areas:
 
-CampOS is under active development. The public landing page, authentication UI, application shell and first dashboard data queries are implemented. The database schema is an initial draft and must be reviewed/applied against the target Supabase project. Several modules are UI foundations and are not yet verified end-to-end. Do not use this deployment with real student data until the security and RLS checklist in supabase/SECURITY_TEST_MATRIX.md is completed against the live Supabase project.
+- **Dashboard and profile** — campus overview and personal profile.
+- **Authentication** — email/password sign-in, registration and password recovery through Supabase Auth.
+- **Communication** — campus rooms and direct messages.
+- **Academic** — learning resources, assignments and submissions.
+- **Campus** — announcements, events, clubs, timetable, study groups and feedback.
+- **Student services** — Lost & Found and Request Desk.
+- **Marketplace** — student listings.
+- **Administration** — college administration and account-verification screens.
+- **AI assistant screen** — interface foundation; AI backend and retrieval are not yet complete.
 
-### Implemented frontend surfaces
+The presence of a screen does not mean every workflow is fully connected or production-tested. See [the security test matrix](supabase/SECURITY_TEST_MATRIX.md) for the current verification status.
 
-- Public landing page and responsive navigation
-- Login, registration, password recovery and password reset screens
-- Student dashboard with Supabase-backed announcements, notifications and room-membership queries
-- Private direct messages, campus directory search and room creation RPCs
-- Academic resources with private Storage and short-lived signed downloads
-- Lost & Found claims and reporter verification
-- Capacity-aware event registration and waitlists
-- Faculty assignment publishing, student submissions and grading
-- Authorized college-wide announcement publishing
-- Admin verification queue with verified-email approval
-- Initial page surfaces for rooms, messaging, resources, Lost & Found, Request Desk, announcements, events, clubs, marketplace, study groups, timetable, feedback, administration and AI
+## Tech stack
 
-### Planned / incomplete production workflows
+| Area | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite |
+| Styling | Tailwind CSS |
+| Routing | React Router |
+| Data fetching | TanStack Query |
+| Forms and validation | React Hook Form, Zod |
+| Backend | Supabase |
+| Database | PostgreSQL with Row Level Security |
+| Authentication | Supabase Auth |
+| File storage | Supabase Storage |
+| Hosting | Vercel |
 
-- Server-side registration provisioning and first-admin bootstrap
-- Complete role- and membership-scoped RLS policies for every table
-- Verified real-time messaging and private conversation workflows
-- Secure Storage policies and signed file access
-- Complete service, academic, events and moderation workflows
-- Permission-aware AI document ingestion, retrieval and citations
+## Run locally
 
-## Features
+### Requirements
 
-### Core Modules
-- **Authentication & Identity** — Supabase Auth with institutional verification, unique CampOS IDs
-- **Campus Communication** — Real-time rooms, channels, and group discussions
-- **Private Messaging** — Direct messages, group conversations, message requests
-- **Academic Hub** — Resource upload/download, subject organization, bookmarks
-- **Lost & Found** — Item reports, claims, verification workflows
-- **Request Desk** — Maintenance tickets, assignments, status tracking
-- **Announcements** — Official institutional notices with scoped visibility
-- **Events** — Event creation, registration, capacity management
-- **Clubs** — Student organizations, memberships, leadership
-- **Marketplace** — Student-to-student item exchange
-- **Study Groups** — Academic collaboration groups
-- **Timetable** — Class schedules, room assignments
-- **Feedback** — Anonymous and attributed feedback submission
-- **AI Assistant** — RAG-powered campus information retrieval
+- Node.js 18 or newer
+- npm
+- A Supabase project with the CampOS migrations applied
 
-### Security
-- Row Level Security on all tables
-- College-scoped data isolation
-- Role-based access control (8 roles)
-- Server-side authorization enforcement
-- Secure file storage with access policies
-- Audit logging
+### 1. Clone the repository
 
-## Setup
-
-### Prerequisites
-- Node.js 18+
-- A Supabase project
-- (Optional) AI provider API key
-
-### Installation
-
-1. **Clone and install dependencies:**
 ```bash
+git clone https://github.com/animewar3000-dot/Pr_clg_1.git
+cd Pr_clg_1
 npm install
 ```
 
-2. **Configure environment:**
+### 2. Configure environment variables
+
+Copy the example file:
+
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your Supabase credentials:
+Set the following values in `.env.local`:
+
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+VITE_APP_URL=http://localhost:5173
+VITE_APP_NAME=CampOS
 ```
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
 
-3. **Set up the database:**
-Run every migration in `supabase/migrations/` in numeric order in your Supabase SQL Editor. Start with `001_initial_schema.sql`, then `002_secure_onboarding_and_rls.sql`. The second migration adds the auth-user profile trigger and stricter RLS policies. Registration will reject users until a college row exists with a matching college code and email domain. Follow `supabase/BOOTSTRAP_ADMIN.md` to register the first college and securely bootstrap the first college administrator.
+Use the Supabase project URL and its publishable (or legacy anon) key. These frontend values are public by design; never put a Supabase service-role key or other private secret in a `VITE_` variable or commit it to Git.
 
-4. **Create storage buckets:**
-In Supabase Dashboard → Storage, create these buckets:
-- `resources` (for academic files)
-- `avatars` (for profile pictures)
-- `item-images` (for lost & found photos)
-- `listings` (for marketplace images)
-- `ticket-attachments` (for request desk files)
+### 3. Apply database migrations
 
-5. **Enable authentication:**
-In Supabase Dashboard → Authentication → Providers, enable Email provider.
+In the Supabase SQL Editor, apply the files in `supabase/migrations/` in numeric order:
 
-6. **Run the application:**
+1. `001_initial_schema.sql`
+2. `002_secure_onboarding_and_rls.sql`
+
+If using the newer college student ID/admin additions, also review and apply `003_college_student_id_and_jd_admin.sql` according to its contents and the current database state. Do not re-run migrations on an already configured database unless you understand their effects.
+
+For first-college and first-administrator setup, read [supabase/BOOTSTRAP_ADMIN.md](supabase/BOOTSTRAP_ADMIN.md). Use verified college information. For a demo without college-issued email accounts, the bootstrap guide explains the manual-verification approach.
+
+### 4. Start the development server
+
 ```bash
 npm run dev
 ```
 
-### Build for Production
+Vite prints the local URL in the terminal (normally http://localhost:5173).
+
+## Useful commands
+
 ```bash
-npm run build
+npm run dev        # Start local development
+npm run build      # Create the production build in dist/
+npm run typecheck  # Run TypeScript checks
 ```
 
-## Database Schema
+## Deployment
 
-See `supabase/migrations/001_initial_schema.sql` for the complete schema.
+The project is deployed on **Vercel**.
 
-### Key Tables
-- `colleges` — Institutional entities
-- `profiles` — User profiles linked to auth.users
-- `role_assignments` — RBAC permissions
-- `rooms` / `messages` — Communication
-- `conversations` / `conversation_members` — Private messaging
-- `resources` — Academic materials
-- `item_reports` / `item_claims` — Lost & Found
-- `tickets` / `ticket_categories` — Request Desk
-- `announcements` — Official notices
-- `events` / `event_registrations` — Event management
-- `clubs` / `club_memberships` — Student organizations
-- `marketplace_listings` — Student marketplace
-- `study_groups` / `study_group_members` — Study groups
-- `timetable_entries` — Class schedules
-- `notifications` — User notifications
-- `feedback_submissions` — Feedback system
-- `audit_logs` — Security audit trail
+- Production URL: https://campos-nu.vercel.app/
+- Framework: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
 
-## Roles & Permissions
+Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment settings for every deployment environment you use (Production, Preview and Development), then trigger a new deployment after changing them.
 
-| Role | Capabilities |
-|------|-------------|
-| Student | Basic access, messaging, resources, services |
-| Faculty | Student interaction, resource publishing, announcements |
-| Class Representative | Section-level communication, coordination |
-| Club Moderator | Club management, event organization |
-| Support Staff | Ticket handling, maintenance |
-| Department Admin | Department-level management |
-| College Admin | Full college management |
-| Super Admin | Cross-college administration |
+The repository also contains `vercel.json` for the Vite build and client-side route fallback. Do not put private backend credentials in frontend environment variables.
 
-## Technology Stack
+## Database and security
 
-- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS
-- **State:** TanStack Query (server state), React Context (auth)
-- **Forms:** React Hook Form + Zod validation
-- **Routing:** React Router v6
-- **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
-- **AI:** Provider-agnostic (OpenAI/Anthropic compatible)
+Important project documentation:
 
-## Project Structure
+- [Database migrations](supabase/migrations/)
+- [First-college and first-admin bootstrap](supabase/BOOTSTRAP_ADMIN.md)
+- [Security test matrix](supabase/SECURITY_TEST_MATRIX.md)
 
-```
+CampOS uses Supabase Row Level Security and role assignments to scope campus data. However, the security matrix explicitly distinguishes automated database smoke tests from checks that still need to be completed against the live Supabase project with separate user accounts.
+
+Before using real student information, complete the live checks for each role, cross-college access, private messaging, file storage, email verification, password recovery and realtime subscriptions. The current AI assistant is not a completed RAG service, and some provisioned Storage buckets still need their feature-specific policies and workflows.
+
+## Project structure
+
+```text
 src/
-├── App.tsx              # Root component with routing
-├── main.tsx             # Entry point
-├── vite-env.d.ts        # Vite type declarations
-├── lib/
-│   ├── config.ts        # Environment configuration
-│   ├── supabase.ts      # Supabase client
-│   ├── types.ts         # Domain type definitions
-│   └── validations.ts   # Zod validation schemas
-├── contexts/
-│   └── AuthContext.tsx   # Authentication context
-├── components/
-│   └── Layout.tsx       # App layout with navigation
+├── App.tsx
+├── main.tsx
+├── components/       # Shared layout and UI components
+├── contexts/         # Authentication context
+├── lib/              # Supabase client, config, types and validation
 └── pages/
-    ├── auth/            # Login, Register, Password Reset
-    ├── communication/   # Rooms, Messages
-    ├── academic/        # Resources
-    ├── services/        # Lost & Found, Request Desk
-    ├── campus/          # Announcements, Events, Clubs, etc.
-    ├── ai/              # AI Assistant
-    ├── admin/           # Administration
-    ├── DashboardPage.tsx
-    ├── ProfilePage.tsx
-    └── SetupGuidePage.tsx
+    ├── academic/     # Resources and assignments
+    ├── admin/        # Administration
+    ├── ai/           # AI assistant interface
+    ├── auth/         # Login, registration and password flows
+    ├── campus/       # Announcements, events, clubs, timetable, etc.
+    ├── communication/# Rooms and messages
+    └── services/     # Lost & Found and Request Desk
 
 supabase/
-└── migrations/
-    └── 001_initial_schema.sql
+├── migrations/       # Ordered SQL migrations
+├── tests/            # Database smoke tests
+├── BOOTSTRAP_ADMIN.md
+└── SECURITY_TEST_MATRIX.md
 ```
 
-## Known Limitations & Dependencies
+## Contributing
 
-1. **Supabase Required** — Netlify has the frontend URL and publishable key configured. Database schema/migrations and RLS policies still need to be applied and verified against the target project.
-
-2. **AI Services** — The AI assistant requires a configured AI provider (OpenAI/Anthropic) with API credentials. Without configuration, the interface is available but responses require backend integration.
-
-3. **Email Verification** — Requires Supabase email provider configuration for account verification.
-
-4. **File Storage** — Requires private buckets and tested Storage policies; bucket creation alone is not sufficient.
-
-5. **Real-time** — Requires Supabase Realtime to be enabled for the relevant tables.
-
-6. **Background Jobs** — Scheduled tasks (event reminders, ticket escalation) require pg_cron or external scheduling.
-
-7. **Multi-college** — Architecture supports multi-tenancy but initial deployment targets a single college.
-
-## Security Notes
-
-The initial migration enables RLS on only a subset of tables and its first-pass policies are not yet sufficient for production use. Do not treat the security statements in the original product specification as completed controls. A follow-up migration and role-by-role authorization tests are required before storing real student information.
+1. Create a feature branch.
+2. Keep changes focused and test the affected workflow.
+3. Run `npm run build` and `npm run typecheck`.
+4. Open a pull request with a short description and screenshots for UI changes.
 
 ## License
 
-Proprietary — CampOS Platform
+Proprietary — CampOS Platform.
