@@ -167,7 +167,7 @@ export function Layout() {
           <button type="button" onClick={() => setSearchOpen(true)} className="campos-search-trigger flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-[#172B4D]/10 bg-white px-3 text-left text-sm text-slate-500 transition hover:border-[#386BE8]/40 lg:h-10 lg:max-w-[320px] lg:flex-none lg:gap-3" aria-label="Search CampOS pages (Control or Command K)">
             <Search size={16} className="shrink-0" />
             <span className="flex-1 truncate">Search CampOS pages...</span>
-            <kbd className="hidden rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 sm:inline-flex"><Command size={10} /> K</kbd>
+            <kbd className="hidden rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 lg:inline-flex"><Command size={10} /> K</kbd>
           </button>
           <div className="hidden items-center gap-2 lg:flex">
             <div className="hidden text-right md:block">
