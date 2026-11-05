@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2213 1652" width="2213" height="1652">
+  <defs>
+    <path id="c" d="M1032 630C1032 540 900 450 740 450C540 450 375 620 375 830C375 1040 540 1208 735 1208C880 1208 1032 1100 1032 1020C1032 960 985 927 940 927C890 927 870 960 850 985C820 1025 780 1040 735 1040C640 1040 555 950 555 830C555 710 640 610 740 610C800 610 840 630 880 680C905 710 920 712 940 712C990 712 1032 680 1032 630Z"/>
+    <ellipse id="o" cx="1472" cy="829" rx="367" ry="379"/>
+    <rect id="hole" x="1300" y="627" width="343" height="401" rx="165" ry="195"/>
+    <clipPath id="holeClip"><use href="#hole"/></clipPath>
+  </defs>
+  <rect width="2213" height="1652" fill="#F5F5EF"/>
+  <g transform="translate(58 62)" fill="#000" stroke="#000" stroke-width="70" stroke-linejoin="round">
+    <use href="#c"/>
+    <use href="#o"/>
+  </g>
+  <use href="#c" fill="#16F851" stroke="#000" stroke-width="70" stroke-linejoin="round" paint-order="stroke"/>
+  <use href="#o" fill="#FFB113" stroke="#000" stroke-width="70" paint-order="stroke"/>
+  <use href="#hole" fill="#FFB113" stroke="#000" stroke-width="35"/>
+  <g clip-path="url(#holeClip)"><rect x="1280" y="948" width="400" height="100" fill="#000"/></g>
+  <g fill="#000" shape-rendering="crispEdges">
+    <rect x="1425" y="720" width="14" height="18"/><rect x="1418" y="738" width="28" height="18"/><rect x="1411" y="756" width="42" height="17"/><rect x="1390" y="773" width="84" height="17"/><rect x="1411" y="790" width="42" height="18"/><rect x="1397" y="808" width="70" height="18"/><rect x="1380" y="826" width="104" height="19"/><rect x="1397" y="845" width="70" height="18"/><rect x="1383" y="863" width="98" height="18"/><rect x="1366" y="881" width="132" height="22"/><rect x="1418" y="903" width="29" height="45"/>
+  </g>
+  <g fill="#000" shape-rendering="crispEdges">
+    <rect x="1537" y="850" width="6" height="8"/><rect x="1533" y="858" width="14" height="10"/><rect x="1527" y="868" width="10" height="10"/><rect x="1545" y="868" width="12" height="10"/><rect x="1522" y="878" width="36" height="12"/><rect x="1520" y="890" width="40" height="12"/><rect x="1520" y="902" width="12" height="13"/><rect x="1542" y="902" width="18" height="13"/>
+  </g>
+  <g stroke="#000" stroke-width="11" stroke-linecap="round"><line x1="1505" y1="920" x2="1570" y2="943"/><line x1="1570" y1="920" x2="1505" y2="943"/></g>
+  <g fill="#2F80F5" shape-rendering="crispEdges"><rect x="1731" y="415" width="14" height="30"/><rect x="1769" y="432" width="24" height="24"/><rect x="1745" y="456" width="24" height="24"/><rect x="1777" y="482" width="28" height="14"/></g>
+  <polygon fill="#2F80F5" shape-rendering="crispEdges" points="1678,527 1690,527 1690,540 1700,540 1700,552 1710,552 1710,565 1720,565 1720,577 1730,577 1730,588 1745,588 1745,598 1724,598 1736,612 1736,632 1724,634 1724,620 1712,608 1700,620 1690,620 1678,620"/>
+</svg>
