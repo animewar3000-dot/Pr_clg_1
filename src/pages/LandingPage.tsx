@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BrandMark } from '../components/BrandMark';
+import { MorphingText } from '../components/MorphingText';
 
 const features = [
   { icon: Users, number: '01', title: 'Find your people', description: 'Section-wise rooms, subject spaces, private messages and study groups keep conversations close to the work.' },
@@ -30,6 +31,8 @@ const features = [
   { icon: CalendarDays, number: '05', title: 'Campus life, connected', description: 'Discover official announcements, events, clubs, permitted listings and academic schedules.' },
   { icon: Sparkles, number: '06', title: 'CampOS assistant', description: 'Ask questions against approved campus documents, with source references and permission-aware retrieval.' },
 ];
+
+const heroPhrases = ['Connected.', 'In sync.', 'One place.'];
 
 const faqs = [
   { question: 'Who can use CampOS?', answer: 'CampOS is designed for verified students, faculty, administrators and authorized campus support staff. Access depends on the institution’s registration and approval process.' },
@@ -58,8 +61,8 @@ export function LandingPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#F8F5EC] text-[#13171F]">
       <header className="sticky top-0 z-40 border-b border-[#172B4D]/10 bg-[#F8F5EC]/95 backdrop-blur">
-        <nav aria-label="Main navigation" className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8">
-          <Link to="/" className="flex items-center gap-3" aria-label="CampOS home">
+        <nav aria-label="Main navigation" className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-3 px-4 sm:h-[76px] sm:px-8">
+          <Link to="/" className="flex min-w-0 scale-[.92] origin-left items-center gap-3 sm:scale-100" aria-label="CampOS home">
             <BrandMark size="md" />
           </Link>
           <div className="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
@@ -70,26 +73,30 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/auth/login" className="hidden rounded-xl px-3 py-2 text-sm font-bold text-[#172B4D] transition hover:bg-white sm:inline-flex">Log in</Link>
-            <Link to="/auth/register" className="inline-flex items-center gap-2 rounded-xl bg-[#386BE8] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB]">
+            <Link to="/auth/register" className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#386BE8] px-3 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] sm:gap-2 sm:px-4 sm:text-sm">
               Get started <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
           </div>
         </nav>
       </header>
 
-      <section className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-[1.02fr_.98fr] lg:gap-8 lg:pb-28 lg:pt-24">
+      <section className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-12 sm:gap-12 sm:px-8 sm:pb-20 sm:pt-16 lg:grid-cols-[1.02fr_.98fr] lg:gap-8 lg:pb-28 lg:pt-24">
         <div className="relative z-10">
           <motion.div {...revealProps} className="inline-flex items-center gap-2 rounded-full border border-[#386BE8]/20 bg-white/70 px-4 py-2 text-xs font-extrabold tracking-[.16em] text-[#386BE8]">
             <span className="h-2 w-2 rounded-full bg-[#14A89C]" /> A BETTER WAY TO DO CAMPUS
           </motion.div>
-          <motion.h1 {...revealProps} transition={{ duration: reducedMotion ? 0 : 0.62, delay: 0.06 }} className="mt-7 max-w-3xl font-black leading-[.91] tracking-[-.055em] text-[#13171F]">
-            <span className="block text-[clamp(4rem,8vw,7.2rem)]">Your campus.</span>
-            <span className="mt-2 block text-[clamp(4rem,8vw,7.2rem)] text-[#386BE8]">Connected<span className="text-[#F55C4A]">.</span></span>
+          <motion.h1 {...revealProps} transition={{ duration: reducedMotion ? 0 : 0.62, delay: 0.06 }} className="mt-7 max-w-3xl font-black leading-[.94] tracking-[-.055em] text-[#13171F]">
+            <span className="block text-[clamp(2.65rem,6.4vw,6rem)]">Your campus.</span>
+            <MorphingText
+              texts={heroPhrases}
+              label="Connected. In sync. One place."
+              className="mt-2 text-left text-[clamp(2.65rem,6.4vw,6rem)] font-black tracking-[-.055em] text-[#386BE8]"
+            />
           </motion.h1>
-          <motion.p {...revealProps} transition={{ duration: reducedMotion ? 0 : 0.58, delay: 0.12 }} className="mt-7 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
+          <motion.p {...revealProps} transition={{ duration: reducedMotion ? 0 : 0.58, delay: 0.12 }} className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:mt-7 sm:text-xl sm:leading-8">
             One place to connect with classmates, discover resources, stay updated and make campus life easier.
           </motion.p>
-          <motion.div {...revealProps} transition={{ duration: reducedMotion ? 0 : 0.58, delay: 0.18 }} className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <motion.div {...revealProps} transition={{ duration: reducedMotion ? 0 : 0.58, delay: 0.18 }} className="mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row">
             <Link to="/auth/register" className="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-[#386BE8] px-7 text-base font-extrabold text-white shadow-xl shadow-[#386BE8]/20 transition hover:-translate-y-1 hover:bg-[#2859CB]">
               Get started <ArrowRight size={18} aria-hidden="true" />
             </Link>
@@ -97,7 +104,7 @@ export function LandingPage() {
               Explore CampOS <Compass size={18} aria-hidden="true" />
             </a>
           </motion.div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold tracking-wide text-slate-500">
+          <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] sm:mt-8 sm:text-xs font-bold tracking-wide text-slate-500">
             <span className="inline-flex items-center gap-2"><ShieldCheck size={15} className="text-[#14A89C]" /> VERIFIED CAMPUS IDENTITY</span>
             <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
             <span>BUILT FOR REAL COLLEGE LIFE</span>
