@@ -75,10 +75,14 @@ function CircleAnimation({ reducedMotion }: { reducedMotion: boolean }) {
 
     resize();
     draw();
-    window.addEventListener('resize', resize);
+    const handleResize = () => {
+      resize();
+      if (reducedMotion) draw();
+    };
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', handleResize);
       if (frameId) window.cancelAnimationFrame(frameId);
     };
   }, [reducedMotion]);
