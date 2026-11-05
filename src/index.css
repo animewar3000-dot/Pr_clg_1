@@ -105,3 +105,65 @@ button:disabled {
     scroll-behavior: auto !important;
   }
 }
+
+/* Shared responsive guardrails for every authenticated module. */
+.campos-main,
+.campos-main > *,
+.campos-main :where(section, article, form, aside, nav, header, footer) {
+  min-width: 0;
+}
+
+.campos-main :where(input, select, textarea, button) {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.campos-main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  min-width: 0;
+}
+
+.campos-main :where(table) {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+@media (max-width: 900px) {
+  .campos-main {
+    width: 100%;
+    overflow-x: clip;
+  }
+
+  .campos-main :where(section, article, form, .grid, .flex) {
+    min-width: 0;
+  }
+
+  .campos-main :where(.flex.items-center.justify-between, .flex.items-end.justify-between) {
+    flex-wrap: wrap;
+  }
+
+  .campos-main :where(table) {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+}
+
+@media (max-width: 640px) {
+  .campos-main {
+    padding-left: max(.75rem, env(safe-area-inset-left));
+    padding-right: max(.75rem, env(safe-area-inset-right));
+  }
+
+  .campos-main form .grid-cols-2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .campos-main :where(button, a[role="button"]) {
+    min-height: 40px;
+  }
+
+  .campos-main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    width: 100%;
+  }
+}
