@@ -113,7 +113,7 @@ export function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5EC] text-[#13171F]">
+    <div className="min-h-screen overflow-x-clip bg-[#F8F5EC] text-[#13171F]">
       <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-white/10 bg-[#172B4D] text-white shadow-[8px_0_32px_rgba(15,32,58,.08)] transition-[width] duration-300 ease-out lg:flex ${collapsed ? 'w-[84px]' : 'w-[264px]'}`}>
         <SidebarContent
           collapsed={collapsed}
@@ -156,20 +156,20 @@ export function Layout() {
       </AnimatePresence>
 
       <div className={`min-h-screen transition-[padding] duration-200 ${sidebarWidth}`}>
-        <header className="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-[#172B4D]/10 bg-[#F8F5EC]/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 campos-topbar sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-[#172B4D]/10 bg-[#F8F5EC]/95 px-3 backdrop-blur-xl sm:px-4 lg:h-[72px] lg:gap-3 lg:px-8">
           <button type="button" onClick={() => setMobileOpen(true)} className="grid h-10 w-10 place-items-center rounded-xl border border-[#172B4D]/10 bg-white text-[#172B4D] lg:hidden" aria-label="Open navigation">
             <Menu size={20} />
           </button>
-          <div className="min-w-0 flex-1">
-            <p className="hidden text-[10px] font-black tracking-[.18em] text-[#386BE8] sm:block">YOUR CAMPUS / CONNECTED</p>
+          <div className="hidden min-w-0 flex-1 lg:block">
+            <p className="text-[10px] font-black tracking-[.18em] text-[#386BE8]">YOUR CAMPUS / CONNECTED</p>
             <h1 className="truncate text-base font-extrabold text-[#172B4D]">{activeItem?.name || 'CampOS'}</h1>
           </div>
-          <button type="button" onClick={() => setSearchOpen(true)} className="flex h-10 min-w-0 items-center gap-3 rounded-xl border border-[#172B4D]/10 bg-white px-3 text-left text-sm text-slate-500 transition hover:border-[#386BE8]/40 sm:w-[260px] lg:w-[320px]" aria-label="Search CampOS pages (Control or Command K)">
+          <button type="button" onClick={() => setSearchOpen(true)} className="campos-search-trigger flex h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-[#172B4D]/10 bg-white px-3 text-left text-sm text-slate-500 transition hover:border-[#386BE8]/40 lg:h-10 lg:max-w-[320px] lg:flex-none lg:gap-3" aria-label="Search CampOS pages (Control or Command K)">
             <Search size={16} className="shrink-0" />
             <span className="flex-1 truncate">Search CampOS pages...</span>
             <kbd className="hidden rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 sm:inline-flex"><Command size={10} /> K</kbd>
           </button>
-          <div className="hidden items-center gap-2 sm:flex">
+          <div className="hidden items-center gap-2 lg:flex">
             <div className="hidden text-right md:block">
               <p className="max-w-[170px] truncate text-xs font-extrabold text-[#172B4D]">{userLabel}</p>
               <p className="text-[10px] font-semibold text-slate-500">{profile?.campus_id || 'Campus member'}</p>
@@ -179,8 +179,8 @@ export function Layout() {
             </button>
           </div>
           <div className="relative">
-            <button type="button" onClick={() => setQuickActionsOpen(value => !value)} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#386BE8] px-3 text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] sm:px-4">
-              <Plus size={17} /> <span className="hidden sm:inline">Quick action</span>
+            <button type="button" onClick={() => setQuickActionsOpen(value => !value)} className="inline-flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#386BE8] text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] lg:h-10 lg:w-auto lg:px-4">
+              <Plus size={19} /> <span className="hidden lg:inline">Quick action</span>
             </button>
             <AnimatePresence>
               {quickActionsOpen && (
@@ -201,7 +201,7 @@ export function Layout() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1600px] px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-10">
+        <main className="campos-main mx-auto w-full min-w-0 max-w-[1600px] px-3 pb-28 pt-5 sm:px-5 sm:pt-6 lg:px-8 lg:pb-10">
           <Outlet />
         </main>
       </div>
