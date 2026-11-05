@@ -1,15 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <defs>
-    <linearGradient id="roof" x1="10" y1="9" x2="54" y2="54" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7EA5FF"/>
-      <stop offset="1" stop-color="#386BE8"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="18" fill="#172B4D"/>
-  <path d="M9 27 32 9l23 18" stroke="url(#roof)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M15 27v27h34V27" stroke="#F8F7F2" stroke-width="3.5" stroke-linejoin="round"/>
-  <path d="M25 54V35h14v19" stroke="#14B8A6" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M20 31h24" stroke="#F8F7F2" stroke-opacity=".4" stroke-width="1.5" stroke-linecap="round"/>
-  <circle cx="48" cy="15" r="4" fill="#F5A82E"/>
-  <circle cx="48" cy="15" r="7" fill="#F5A82E" fill-opacity=".16"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <title>CampOS</title>
+  <rect width="600" height="600" fill="#172B4D"/>
+  <g transform="translate(-15 0)" fill="none">
+    <path d="M304.35 246A84 84 0 1 0 304.35 354" stroke="#F8F4EC" stroke-width="52"/>
+    <path d="M304.35 246A84 84 0 0 0 261.74 218.86" stroke="#FF5A3C" stroke-width="52"/>
+    <circle cx="390" cy="300" r="84" stroke="#172B4D" stroke-width="82"/>
+    <circle cx="390" cy="300" r="84" stroke="#2F6BEB" stroke-width="52"/>
+    <circle cx="390" cy="300" r="17" fill="#F5A623"/>
+  </g>
 </svg>
