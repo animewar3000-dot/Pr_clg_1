@@ -67,7 +67,6 @@ function PanelHeading({ eyebrow, title, href, linkLabel }: { eyebrow: string; ti
         <h2 className="mt-2 text-xl font-extrabold tracking-tight text-[#172B4D]">{title}</h2>
       </div>
       {href && linkLabel && <Link to={href} className="inline-flex items-center gap-1 text-xs font-extrabold text-[#386BE8] transition hover:gap-2">{linkLabel} <ArrowRight size={14} /></Link>}
-      </ScrollReveal>
     </div>
   );
 }
@@ -259,7 +258,6 @@ export function DashboardPage() {
       </section>
       </ScrollReveal>
 
-      <ScrollReveal>
       <section className="rounded-2xl border border-[#172B4D]/10 bg-white p-5 shadow-sm sm:p-6">
         <PanelHeading eyebrow="YOUR COMMUNITY" title="Rooms you belong to" href="/rooms" linkLabel="Explore rooms" />
         <div className="mt-5">
