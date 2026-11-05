@@ -6,13 +6,11 @@ import {
   ArrowUpRight,
   BookOpen,
   CalendarDays,
-  CheckCircle2,
   HelpCircle,
   Compass,
   FileSearch,
   GraduationCap,
   LockKeyhole,
-  MessageCircle,
   Search,
   ShieldCheck,
   Sparkles,
@@ -133,9 +131,9 @@ export function LandingPage() {
                 <span className="text-[9px] font-black tracking-[.18em] text-[#9DB5E8] sm:text-[10px]">YOUR CAMPUS / OVERVIEW</span>
                 <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70">ONE HOME BASE</span>
               </div>
-              <h2 className="mt-5 max-w-sm text-[clamp(1.65rem,5vw,2.55rem)] font-extrabold leading-[1.02] tracking-[-.045em]">
+              <p className="mt-5 max-w-sm text-[clamp(1.65rem,5vw,2.55rem)] font-extrabold leading-[1.02] tracking-[-.045em]">
                 Everything campus,<br className="hidden min-[380px]:block" /> in one place<span className="text-[#F5A82E]">.</span>
-              </h2>
+              </p>
               <p className="mt-3 max-w-sm text-xs leading-5 text-white/65 sm:text-sm sm:leading-6">
                 Your people, academic spaces and everyday campus services—together.
               </p>
