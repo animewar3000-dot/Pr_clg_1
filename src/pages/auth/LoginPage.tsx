@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +16,7 @@ export function LoginPage() {
   const { signIn, error: authError } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -37,8 +39,9 @@ export function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         {authError && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
         <div>
-          <label htmlFor="email" className="text-sm font-bold text-[#172B4D]">College email</label>
-          <input id="email" type="email" autoComplete="username" {...register('email')} className={fieldClass} placeholder="you@college.edu" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined} />
+          <label htmlFor="email" className="text-sm font-bold text-[#172B4D]">Email address</label>
+          <div className="relative mt-2"><Mail size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          <input id="email" type="email" autoComplete="username" {...register('email')} className={`${fieldClass} mt-0 min-h-12 pl-11`} placeholder="you@example.com" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'email-error' : undefined} /></div>
           {errors.email && <p id="email-error" role="alert" className="mt-2 text-xs font-semibold text-red-600">{errors.email.message}</p>}
         </div>
         <div>
@@ -46,13 +49,15 @@ export function LoginPage() {
             <label htmlFor="password" className="text-sm font-bold text-[#172B4D]">Password</label>
             <Link to="/auth/forgot-password" className="text-xs font-bold text-[#386BE8] hover:underline">Forgot password?</Link>
           </div>
-          <input id="password" type="password" autoComplete="current-password" {...register('password')} className={fieldClass} placeholder="Enter your password" aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'password-error' : undefined} />
+          <div className="relative mt-2"><LockKeyhole size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+          <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" {...register('password')} className={`${fieldClass} mt-0 min-h-12 pl-11 pr-12`} placeholder="Enter your password" aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'password-error' : undefined} />
+          <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-[#172B4D]">{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
           {errors.password && <p id="password-error" role="alert" className="mt-2 text-xs font-semibold text-red-600">{errors.password.message}</p>}
         </div>
-        <button type="submit" disabled={isLoading} className="inline-flex min-h-13 w-full items-center justify-center rounded-xl bg-[#386BE8] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] disabled:cursor-not-allowed disabled:opacity-60">
+        <button type="submit" disabled={isLoading} className="inline-flex min-h-13 w-full items-center justify-center rounded-xl bg-[#2859CB] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] disabled:cursor-not-allowed disabled:opacity-60">
           <AuthSubmitLabel loading={isLoading}>Sign in</AuthSubmitLabel>
         </button>
-        <p className="text-center text-sm text-slate-600">New to CampusIQ? <Link to="/auth/register" className="font-extrabold text-[#386BE8] hover:underline">Create an account</Link></p>
+        <p className="text-center text-sm text-slate-600">New to CampOS? <Link to="/auth/register" className="font-extrabold text-[#386BE8] hover:underline">Create an account</Link></p>
       </form>
     </AuthLayout>
   );
