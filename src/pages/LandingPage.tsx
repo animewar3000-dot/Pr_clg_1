@@ -72,7 +72,7 @@ export function LandingPage() {
             <a href="#faq" className="transition hover:text-[#386BE8]">FAQs</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/auth/login" className="hidden rounded-xl px-3 py-2 text-sm font-bold text-[#172B4D] transition hover:bg-white sm:inline-flex">Log in</Link>
+            <Link to="/auth/login" className="hidden min-[360px]:inline-flex rounded-lg px-1.5 py-2 text-xs font-bold text-[#172B4D] transition hover:bg-white sm:rounded-xl sm:px-3 sm:text-sm">Log in</Link>
             <Link to="/auth/register" className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#386BE8] px-3 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#386BE8]/15 transition hover:-translate-y-0.5 hover:bg-[#2859CB] sm:gap-2 sm:px-4 sm:text-sm">
               Get started <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
@@ -179,7 +179,7 @@ export function LandingPage() {
             <h2 className="mt-3 text-3xl font-black leading-[1.02] tracking-[-.045em] text-[#13171F] sm:mt-4 sm:text-6xl">Built around your<br />actual campus day.</h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">Useful campus tools should work together, not make you jump between disconnected places.</p>
           </motion.div>
-          <div className="mt-8 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:mt-12 sm:gap-4 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:mt-12 sm:gap-4 lg:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
@@ -197,7 +197,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="scroll-mt-24 bg-[#172B4D] py-20 text-white sm:py-28">
+      <section id="how-it-works" className="scroll-mt-20 bg-[#172B4D] py-14 text-white sm:py-24 lg:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[.85fr_1.15fr]">
           <motion.div {...revealProps}>
             <p className="text-xs font-black tracking-[.18em] text-[#75D7CC]">A SIMPLE START</p>
@@ -220,7 +220,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="trust" className="scroll-mt-24 bg-[#F8F5EC] py-20 sm:py-24">
+      <section id="trust" className="scroll-mt-20 bg-[#F8F5EC] py-14 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <motion.div {...revealProps} className="grid gap-10 rounded-[2rem] border border-[#172B4D]/10 bg-white p-8 sm:p-12 lg:grid-cols-[.9fr_1.1fr]">
             <div>
@@ -244,7 +244,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="faq" className="scroll-mt-24 bg-white py-20 sm:py-24">
+      <section id="faq" className="scroll-mt-20 bg-white py-14 sm:py-20 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[.7fr_1.3fr]">
           <motion.div {...revealProps}>
             <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.18em] text-[#386BE8]"><HelpCircle size={16} /> FAQ</p>
@@ -268,14 +268,14 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-[#F8F5EC] px-5 py-16 sm:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 rounded-[2rem] bg-[#386BE8] p-8 text-white sm:p-12 lg:flex-row lg:items-center">
-          <div><p className="text-xs font-black tracking-[.18em] text-white/70">YOUR CAMPUS. CONNECTED.</p><h2 className="mt-3 text-4xl font-black tracking-[-.04em] sm:text-5xl">Ready for your next chapter?</h2><p className="mt-4 max-w-xl leading-7 text-white/80">Start with your college identity and discover the spaces that belong to your campus journey.</p></div>
+      <section className="bg-[#F8F5EC] px-4 py-12 sm:px-8 sm:py-16">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 rounded-[1.5rem] bg-[#386BE8] p-6 text-white sm:rounded-[2rem] sm:p-12 lg:flex-row lg:items-center">
+          <div><p className="text-xs font-black tracking-[.18em] text-white/70">YOUR CAMPUS. CONNECTED.</p><h2 className="mt-3 text-3xl font-black tracking-[-.04em] sm:text-5xl">Ready for your next chapter?</h2><p className="mt-4 max-w-xl leading-7 text-white/80">Start with your college identity and discover the spaces that belong to your campus journey.</p></div>
           <Link to="/auth/register" className="inline-flex min-h-14 shrink-0 items-center justify-center gap-3 rounded-xl bg-[#F5A82E] px-7 font-extrabold text-[#13171F] transition hover:-translate-y-1">Get started <ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
       </section>
 
-      <footer className="bg-[#13171F] px-5 py-10 text-white/70 sm:px-8">
+      <footer className="bg-[#13171F] px-4 py-8 text-white/70 sm:px-8 sm:py-10">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <div><div className="flex items-center gap-3 text-lg font-black text-white"><BrandMark inverse size="sm" /> CampOS</div><p className="mt-2 text-sm">Your campus. Connected.</p></div>
           <div className="flex flex-wrap gap-6 text-sm font-semibold"><a href="#features" className="hover:text-white">Platform</a><a href="#trust" className="hover:text-white">Trust & safety</a><a href="#faq" className="hover:text-white">FAQs</a><Link to="/auth/login" className="hover:text-white">Log in</Link></div>
