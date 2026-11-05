@@ -28,6 +28,7 @@ import { AdminPage } from './pages/admin/AdminPage';
 import { SetupGuidePage } from './pages/SetupGuidePage';
 import { LandingPage } from './pages/LandingPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
+import NotFoundPage from './components/ui/page-not-found';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -191,7 +192,7 @@ function AppRoutes() {
       </Route>
 
       {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
