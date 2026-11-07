@@ -18,7 +18,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string, collegeCode: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string, collegeCode: string, collegeStudentId: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
@@ -144,18 +144,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, displayName: string, collegeCode: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    displayName: string,
+    collegeCode: string,
+    collegeStudentId: string,
+  ) => {
     const supabase = getSupabase();
     if (!supabase) throw new Error('Supabase not configured');
     setState(prev => ({ ...prev, error: null }));
-    const { error } = await supabase.auth.signUp({
-      email,
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
       password,
-      options: { data: { display_name: displayName, college_code: collegeCode.trim().toUpperCase() } },
+      options: {
+        data: {
+          display_name: displayName.trim(),
+          college_code: collegeCode.trim().toUpperCase(),
+          college_student_id: collegeStudentId.trim(),
+        },
+      },
     });
+
     if (error) {
-      setState(prev => ({ ...prev, error: error.message }));
-      throw error;
+      const message = error.message.toLowerCase().includes('database error saving new user')
+        ? 'Registration could not be completed. Check that your college code and student ID match your college records. If you already have an account, sign in instead.'
+        : error.message;
+      setState(prev => ({ ...prev, error: message }));
+      throw new Error(message);
+    }
+
+    if (!data.user) {
+      const message = 'We could not confirm account creation. Please try again or sign in if you already registered.';
+      setState(prev => ({ ...prev, error: message }));
+      throw new Error(message);
     }
   };
 

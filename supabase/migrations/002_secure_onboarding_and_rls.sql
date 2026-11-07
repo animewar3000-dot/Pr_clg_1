@@ -93,6 +93,13 @@ AS $$
   );
 $$;
 
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS college_student_id text;
+
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_college_student_id_unique
+  ON public.profiles (college_id, upper(college_student_id))
+  WHERE college_student_id IS NOT NULL;
+
 CREATE OR REPLACE FUNCTION app_private.bootstrap_auth_user()
 RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER
@@ -102,12 +109,14 @@ DECLARE
   v_college_id uuid;
   v_display_name text;
   v_college_code text;
+  v_student_id text;
 BEGIN
   v_college_code := upper(trim(coalesce(NEW.raw_user_meta_data ->> 'college_code', '')));
   v_display_name := trim(coalesce(NEW.raw_user_meta_data ->> 'display_name', ''));
+  v_student_id := upper(trim(coalesce(NEW.raw_user_meta_data ->> 'college_student_id', '')));
 
-  IF v_college_code = '' OR v_display_name = '' OR NEW.email IS NULL THEN
-    RAISE EXCEPTION 'Registration requires a college code, full name and email address';
+  IF v_college_code = '' OR v_display_name = '' OR v_student_id = '' OR NEW.email IS NULL THEN
+    RAISE EXCEPTION 'Registration requires full name, email, college code and college student ID';
   END IF;
 
   SELECT c.id INTO v_college_id
@@ -117,13 +126,13 @@ BEGIN
   LIMIT 1;
 
   IF v_college_id IS NULL THEN
-    RAISE EXCEPTION 'College code or college email domain is not recognized';
+    RAISE EXCEPTION 'College code or email domain is not recognized';
   END IF;
 
   INSERT INTO public.profiles (
-    id, college_id, display_name, email, account_status
+    id, college_id, college_student_id, display_name, email, account_status
   ) VALUES (
-    NEW.id, v_college_id, v_display_name, lower(NEW.email), 'pending_verification'
+    NEW.id, v_college_id, v_student_id, v_display_name, lower(NEW.email), 'pending_verification'
   );
 
   -- The trigger, not the browser, assigns the initial least-privilege student role.
@@ -136,7 +145,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 DROP TRIGGER IF EXISTS on_auth_user_created_camp_os ON auth.users;
 CREATE TRIGGER on_auth_user_created_camp_os
 AFTER INSERT ON auth.users
