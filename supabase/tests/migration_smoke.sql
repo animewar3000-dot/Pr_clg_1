@@ -13,7 +13,7 @@ INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data) VALUE
 ('00000000-0000-4000-8000-000000000003', 'unverified@campus.example.test', NULL, '{"display_name":"Unverified Student","college_code":"CAMPTEST","college_student_id":"TEST-STUDENT-003"}');
 
 -- The production Auth trigger must reject missing college student IDs.
-DO $
+DO $block$
 BEGIN
   BEGIN
     INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data)
@@ -33,10 +33,10 @@ BEGIN
     RAISE EXCEPTION 'Failed signup left behind an Auth user or campus profile';
   END IF;
 END;
-$;
+$block$;
 
 -- A college student ID must be unique within its college.
-DO $
+DO $block$
 BEGIN
   BEGIN
     INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data)
@@ -56,9 +56,9 @@ BEGIN
     RAISE EXCEPTION 'Duplicate-ID signup left behind an Auth user or campus profile';
   END IF;
 END;
-$;
+$block$;
 
-DO $$
+DO $block$
 BEGIN
   IF (SELECT count(*) FROM public.profiles) <> 3 THEN
     RAISE EXCEPTION 'Auth signup trigger did not create both profiles';
@@ -70,7 +70,7 @@ BEGIN
     RAISE EXCEPTION 'College ticket categories were not seeded';
   END IF;
 END;
-$$;
+$block$;
 
 UPDATE public.profiles SET account_status = 'active'
 WHERE id = '00000000-0000-4000-8000-000000000001';
@@ -81,7 +81,7 @@ FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000001';
 
 SELECT set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
 
-DO $$
+DO $block$
 DECLARE
   v_room_id uuid;
   v_conversation_id uuid;
@@ -188,15 +188,15 @@ BEGIN
   END IF;
 
 END;
-$$;
+$block$;
 
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000001', false);
-DO $$
+DO $block$
 BEGIN
   IF (SELECT count(*) FROM public.profiles) <> 1 THEN
     RAISE EXCEPTION 'Profile RLS did not isolate the authenticated user';
   END IF;
 END;
-$$;
+$block$;
 RESET ROLE;
