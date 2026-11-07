@@ -8,9 +8,55 @@ INSERT INTO public.colleges (name, code, email_domain)
 VALUES ('CampOS Test College', 'CAMPTEST', 'campus.example.test');
 
 INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data) VALUES
-('00000000-0000-4000-8000-000000000001', 'admin@campus.example.test', now(), '{"display_name":"Test Admin","college_code":"CAMPTEST"}'),
-('00000000-0000-4000-8000-000000000002', 'student@campus.example.test', now(), '{"display_name":"Test Student","college_code":"CAMPTEST"}'),
-('00000000-0000-4000-8000-000000000003', 'unverified@campus.example.test', NULL, '{"display_name":"Unverified Student","college_code":"CAMPTEST"}');
+('00000000-0000-4000-8000-000000000001', 'admin@campus.example.test', now(), '{"display_name":"Test Admin","college_code":"CAMPTEST","college_student_id":"TEST-ADMIN-001"}'),
+('00000000-0000-4000-8000-000000000002', 'student@campus.example.test', now(), '{"display_name":"Test Student","college_code":"CAMPTEST","college_student_id":"TEST-STUDENT-002"}'),
+('00000000-0000-4000-8000-000000000003', 'unverified@campus.example.test', NULL, '{"display_name":"Unverified Student","college_code":"CAMPTEST","college_student_id":"TEST-STUDENT-003"}');
+
+-- The production Auth trigger must reject missing college student IDs.
+DO $
+BEGIN
+  BEGIN
+    INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data)
+    VALUES (
+      '00000000-0000-4000-8000-000000000004',
+      'missing-id@campus.example.test',
+      now(),
+      '{"display_name":"Missing ID","college_code":"CAMPTEST"}'
+    );
+    RAISE EXCEPTION USING ERRCODE = 'P0002', MESSAGE = 'Signup without college_student_id unexpectedly succeeded';
+  EXCEPTION WHEN SQLSTATE 'P0001' THEN
+    NULL;
+  END;
+
+  IF EXISTS (SELECT 1 FROM auth.users WHERE id = '00000000-0000-4000-8000-000000000004')
+     OR EXISTS (SELECT 1 FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000004') THEN
+    RAISE EXCEPTION 'Failed signup left behind an Auth user or campus profile';
+  END IF;
+END;
+$;
+
+-- A college student ID must be unique within its college.
+DO $
+BEGIN
+  BEGIN
+    INSERT INTO auth.users (id, email, email_confirmed_at, raw_user_meta_data)
+    VALUES (
+      '00000000-0000-4000-8000-000000000005',
+      'duplicate-id@campus.example.test',
+      now(),
+      '{"display_name":"Duplicate ID","college_code":"CAMPTEST","college_student_id":"TEST-STUDENT-002"}'
+    );
+    RAISE EXCEPTION USING ERRCODE = 'P0002', MESSAGE = 'Duplicate college student ID unexpectedly succeeded';
+  EXCEPTION WHEN unique_violation THEN
+    NULL;
+  END;
+
+  IF EXISTS (SELECT 1 FROM auth.users WHERE id = '00000000-0000-4000-8000-000000000005')
+     OR EXISTS (SELECT 1 FROM public.profiles WHERE id = '00000000-0000-4000-8000-000000000005') THEN
+    RAISE EXCEPTION 'Duplicate-ID signup left behind an Auth user or campus profile';
+  END IF;
+END;
+$;
 
 DO $$
 BEGIN

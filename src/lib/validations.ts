@@ -8,10 +8,13 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().trim().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  displayName: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  collegeCode: z.string().min(1, 'College code is required'),
+  displayName: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+  collegeCode: z.string().trim().min(1, 'College code is required'),
+  collegeStudentId: z.string().trim()
+    .min(2, 'College student ID is required')
+    .max(60, 'College student ID must be 60 characters or fewer'),
 });
 
 export const passwordResetSchema = z.object({

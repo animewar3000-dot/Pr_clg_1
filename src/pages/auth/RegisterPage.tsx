@@ -22,7 +22,7 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.displayName, data.collegeCode);
+      await signUp(data.email, data.password, data.displayName, data.collegeCode, data.collegeStudentId);
       setSuccess(true);
     } catch {
       // Authentication errors are displayed by AuthContext.
@@ -62,6 +62,11 @@ export function RegisterPage() {
           <label htmlFor="collegeCode" className="text-sm font-bold text-[#172B4D]">College code</label>
           <input id="collegeCode" autoComplete="off" {...register('collegeCode')} className={fieldClass} placeholder="Your official college code" aria-invalid={Boolean(errors.collegeCode)} />
           {errors.collegeCode && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.collegeCode.message}</p>}
+        </div>
+        <div>
+          <label htmlFor="collegeStudentId" className="text-sm font-bold text-[#172B4D]">College student ID / enrollment number</label>
+          <input id="collegeStudentId" autoComplete="off" {...register('collegeStudentId')} className={fieldClass} placeholder="Your college-issued student ID" aria-invalid={Boolean(errors.collegeStudentId)} />
+          {errors.collegeStudentId && <p role="alert" className="mt-1 text-xs font-semibold text-red-600">{errors.collegeStudentId.message}</p>}
         </div>
         <div>
           <label htmlFor="password" className="text-sm font-bold text-[#172B4D]">Password</label>
