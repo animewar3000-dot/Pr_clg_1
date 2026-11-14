@@ -28,6 +28,12 @@ jobs:
         run: npm ci
       - name: Type-check
         run: npm run typecheck
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check invitation Edge Function
+        run: deno check supabase/functions/invite-campus-user/index.ts
       - name: Build production bundle
         run: npm run build
 
