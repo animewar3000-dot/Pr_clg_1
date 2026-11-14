@@ -57,6 +57,7 @@ BEGIN
           'role', ra.role,
           'scope_type', ra.scope_type,
           'scope_id', ra.scope_id,
+          'scope_label', COALESCE(c.name, d.name, pr.name, s.name, ra.scope_type),
           'granted_at', ra.granted_at
         ) ORDER BY ra.role, ra.scope_type
       ) FILTER (WHERE ra.id IS NOT NULL),
@@ -65,6 +66,10 @@ BEGIN
   FROM public.profiles p
   JOIN auth.users u ON u.id = p.id
   LEFT JOIN public.role_assignments ra ON ra.user_id = p.id
+  LEFT JOIN public.colleges c ON ra.scope_type = 'college' AND c.id = ra.scope_id
+  LEFT JOIN public.departments d ON ra.scope_type = 'department' AND d.id = ra.scope_id
+  LEFT JOIN public.programs pr ON ra.scope_type = 'program' AND pr.id = ra.scope_id
+  LEFT JOIN public.sections s ON ra.scope_type = 'section' AND s.id = ra.scope_id
   WHERE p.college_id = v_college_id
   GROUP BY p.id, p.display_name, p.email, p.campus_id,
            p.account_status, p.created_at, u.email_confirmed_at
