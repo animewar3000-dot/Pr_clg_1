@@ -68,7 +68,7 @@ Verify that exactly the intended account has the `college_admin` role before pro
 
 Sign out and sign back in to CampOS. The administrator should see the Administration page, pending verification queue, and Users & roles workspace. Use the queue to approve pending members. Use Users & roles to invite accounts and grant scoped roles. Approval and role changes are performed by guarded database functions, not direct client updates to protected profile or role fields.
 
-For email invitations, deploy supabase/functions/invite-campus-user with JWT verification enabled. Set the Edge Function secrets APP_URL and APP_ORIGIN for your deployment. Supabase provides SUPABASE_SERVICE_ROLE_KEY to the Edge Function runtime; never place it in frontend environment variables or source control.
+For email invitations, deploy supabase/functions/invite-campus-user with JWT verification enabled. Set APP_URL and APP_ORIGIN to the same full HTTPS origin (without a trailing slash), and add the /auth/reset-password redirect URL to Supabase Auth's redirect allow list. Supabase provides SUPABASE_SERVICE_ROLE_KEY to the Edge Function runtime; never place it in frontend environment variables or source control.
 
 College Admins can manage member roles except College Admin and Super Admin. Super Admins can also grant/revoke College Admin access. Super Admin itself is bootstrap-only and is intentionally not available in the role picker. Role changes are limited to the administrator's own college, and academic scopes are validated against that college.
 
