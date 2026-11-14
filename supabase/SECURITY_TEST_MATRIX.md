@@ -10,13 +10,17 @@ This matrix distinguishes automated PostgreSQL smoke coverage from checks that s
 | Faculty | Student permissions plus authorized college-wide announcements and assignments they create; grade their submissions | Role helper and assignment grading RPC smoke test | Required |
 | Support staff | Only tickets assigned to them or their permitted team; internal comments only for authorized staff | Policy definitions present; no full staff-queue integration test yet | Required |
 | Department administrator | Department-scoped administrative queue and approved workflows; no super-admin privileges | Role helper and pending queue function definitions | Required |
-| College administrator | Same-college pending verification queue; approve only email-verified users; manage authorized campus workflows | Pending queue, verified-email approval, audit insertion tested | Required |
-| Super administrator | Institution-level controls granted explicitly by role assignment | Role helper definition | Required |
+| College administrator | Same-college pending verification queue; approve only email-verified users; invite accounts; grant/revoke ordinary roles in college/department/program/section scopes | Pending queue, verified-email approval, role RPC structural security checks | Required |
+| Super administrator | Same-college controls plus grant/revoke College Admin access; Super Admin itself remains bootstrap-only | Role RPC structural security checks and last-admin guard | Required |
 | Cross-college user | No access to another institution's records, rooms, messages, tickets, resources or storage | Same-college filters exist; dedicated cross-college negative tests still needed | Required |
 
 ## Automated checks currently in CI
 
-- Apply migration 001 and migration 002 to a clean PostgreSQL 16 database with Supabase-compatible Auth and Storage schemas.
+- Apply migrations 001, 002 and 003 to a clean Supabase-compatible PostgreSQL database with Auth and Storage schemas.
+- Verify role-management RPCs are SECURITY DEFINER, unavailable to anon, executable by authenticated callers only through their internal authorization checks, and role_assignments has no direct client INSERT/UPDATE/DELETE privileges.
+- Verify College Admin cannot grant/revoke College Admin or Super Admin; Super Admin can grant/revoke College Admin but cannot grant Super Admin.
+- Verify cross-college scope IDs, self-role changes and removal of the last active College Admin are rejected.
+- Verify account invitation requires an authenticated College Admin or Super Admin and the Auth trigger provisions a pending profile with only the student role.
 - Verify Auth signup creates a pending profile and server-generated Campus ID.
 - Verify default ticket categories are seeded.
 - Verify pending/unverified users are not returned in the active campus directory.
@@ -31,7 +35,7 @@ This matrix distinguishes automated PostgreSQL smoke coverage from checks that s
 
 ## Required before a real campus pilot
 
-1. Apply the migrations to the intended Supabase project and confirm the migration history.
+1. Apply migrations 001–003 to the intended Supabase project and confirm the migration history. Deploy invite-campus-user with JWT verification enabled and test invitation email delivery.
 2. Test with separate accounts for each role, including a second college in a staging database.
 3. Test Storage upload, signed URL expiry, cross-college path access and unauthorized object IDs.
 4. Test private-room and DM access after membership removal and blocking.
