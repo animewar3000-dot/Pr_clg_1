@@ -144,6 +144,9 @@ BEGIN
     RAISE EXCEPTION 'College administrator permission required';
   END IF;
 
+  -- Serialize role changes within a college so the last-admin guard cannot race.
+  PERFORM pg_advisory_xact_lock(hashtext(v_college_id::text));
+
   IF p_user_id IS NULL OR p_user_id = auth.uid() THEN
     RAISE EXCEPTION 'Administrators cannot change their own role assignments';
   END IF;
