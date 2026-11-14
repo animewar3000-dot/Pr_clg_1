@@ -87,6 +87,10 @@ BEGIN
     RAISE EXCEPTION 'College administrator permission required';
   END IF;
 
+  IF p_scope_id IS NULL THEN
+    RAISE EXCEPTION 'A role scope is required';
+  END IF;
+
   IF p_scope_type = 'college' THEN
     RETURN QUERY SELECT c.id, c.name FROM public.colleges c WHERE c.id = v_college_id;
   ELSIF p_scope_type = 'department' THEN
@@ -137,26 +141,29 @@ BEGIN
   END IF;
 
   v_college_id := app_private.current_college_id();
-  v_is_super_admin := app_private.has_college_role(v_college_id, ARRAY['super_admin']);
-  v_is_college_admin := app_private.has_college_role(v_college_id, ARRAY['college_admin']);
-
-  IF v_college_id IS NULL OR NOT (v_is_super_admin OR v_is_college_admin) THEN
+  IF v_college_id IS NULL THEN
     RAISE EXCEPTION 'College administrator permission required';
   END IF;
 
-  -- Serialize role changes within a college so the last-admin guard cannot race.
+  -- Serialize role changes, then re-check authority in case another admin changed it while waiting.
   PERFORM pg_advisory_xact_lock(hashtext(v_college_id::text));
+  v_is_super_admin := app_private.has_college_role(v_college_id, ARRAY['super_admin']);
+  v_is_college_admin := app_private.has_college_role(v_college_id, ARRAY['college_admin']);
+
+  IF NOT (v_is_super_admin OR v_is_college_admin) THEN
+    RAISE EXCEPTION 'College administrator permission required';
+  END IF;
 
   IF p_user_id IS NULL OR p_user_id = auth.uid() THEN
     RAISE EXCEPTION 'Administrators cannot change their own role assignments';
   END IF;
-  IF p_role NOT IN (
+  IF p_role IS NULL OR p_role NOT IN (
     'student', 'faculty', 'class_representative', 'club_moderator',
     'support_staff', 'department_admin', 'college_admin'
   ) THEN
     RAISE EXCEPTION 'Unsupported role';
   END IF;
-  IF p_action NOT IN ('grant', 'revoke') THEN
+  IF p_action IS NULL OR p_action NOT IN ('grant', 'revoke') THEN
     RAISE EXCEPTION 'Action must be grant or revoke';
   END IF;
 
