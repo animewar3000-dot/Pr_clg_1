@@ -257,7 +257,7 @@ export function UserRoleManagement() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0"><p className="truncate font-extrabold text-[#172B4D]">{user.display_name}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.campus_id || 'Campus ID pending'}</p></div>
                   <span className={'rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wide ' + (user.account_status === 'active' ? 'bg-emerald-50 text-emerald-700' : user.account_status === 'pending_verification' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600')}>
-                    {user.account_status.replaceAll('_', ' ')}
+                    {user.account_status.replace(/_/g, ' ')}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
