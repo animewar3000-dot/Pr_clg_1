@@ -185,8 +185,8 @@ export function UserRoleManagement() {
             <label className="block text-xs font-bold text-slate-600">College email
               <input required type="email" maxLength={254} autoComplete="email" value={inviteForm.email} onChange={e => setInviteForm(v => ({ ...v, email: e.target.value }))} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-[#172B4D] outline-none transition focus:border-[#386BE8] focus:bg-white focus:ring-2 focus:ring-[#386BE8]/10" placeholder="name@college.edu" />
             </label>
-            <label className="block text-xs font-bold text-slate-600">College student ID
-              <input required maxLength={80} value={inviteForm.collegeStudentId} onChange={e => setInviteForm(v => ({ ...v, collegeStudentId: e.target.value }))} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-[#172B4D] outline-none transition focus:border-[#386BE8] focus:bg-white focus:ring-2 focus:ring-[#386BE8]/10" placeholder="Official student / staff ID" />
+            <label className="block text-xs font-bold text-slate-600">College-issued ID
+              <input required maxLength={80} value={inviteForm.collegeStudentId} onChange={e => setInviteForm(v => ({ ...v, collegeStudentId: e.target.value }))} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-[#172B4D] outline-none transition focus:border-[#386BE8] focus:bg-white focus:ring-2 focus:ring-[#386BE8]/10" placeholder="Official student or staff ID" />
             </label>
           </div>
           {inviteError && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">{inviteError}</p>}
@@ -219,7 +219,7 @@ export function UserRoleManagement() {
               </select>
             </label>
             <label className="block text-xs font-bold text-slate-600">Scope
-              <select value={scopeType} onChange={e => { setScopeType(e.target.value as RoleScope); setScopeId(''); }} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-[#172B4D] outline-none focus:border-[#7653C8] focus:ring-2 focus:ring-[#7653C8]/10">
+              <select value={scopeType} disabled={selectedRole === 'department_admin' || selectedRole === 'class_representative'} onChange={e => { setScopeType(e.target.value as RoleScope); setScopeId(''); }} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-[#172B4D] outline-none focus:border-[#7653C8] focus:ring-2 focus:ring-[#7653C8]/10">
                 <option value="college">College</option><option value="department">Department</option>
                 <option value="program">Program</option><option value="section">Section</option>
               </select>
