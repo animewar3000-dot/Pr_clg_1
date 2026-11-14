@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const appOrigin = Deno.env.get("APP_ORIGIN");
 const corsHeaders = {
-  "Access-Control-Allow-Origin": appOrigin ?? "*",
+  "Access-Control-Allow-Origin": appOrigin ?? "null",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
@@ -21,7 +21,17 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
 
   const origin = req.headers.get("Origin");
-  if (appOrigin && origin && origin !== appOrigin) return json({ error: "Origin not allowed." }, 403);
+  const appUrl = Deno.env.get("APP_URL");
+  if (!appOrigin || !appUrl) return json({ error: "Invitation origin is not configured." }, 503);
+  if (origin !== appOrigin) return json({ error: "Origin not allowed." }, 403);
+  let redirectTo: string;
+  try {
+    const configuredUrl = new URL(appUrl);
+    if (configuredUrl.origin !== appOrigin) return json({ error: "Invitation URL configuration is invalid." }, 503);
+    redirectTo = new URL("/auth/reset-password", configuredUrl).toString();
+  } catch {
+    return json({ error: "Invitation URL configuration is invalid." }, 503);
+  }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -92,16 +102,13 @@ Deno.serve(async (req: Request) => {
   const adminClient = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const appUrl = Deno.env.get("APP_URL") ?? origin;
-  const redirectTo = appUrl ? new URL("/auth/reset-password", appUrl).toString() : undefined;
-
   const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
     data: {
       display_name: displayName,
       college_code: collegeCode,
       college_student_id: collegeStudentId,
     },
-    ...(redirectTo ? { redirectTo } : {}),
+    redirectTo,
   });
 
   if (error || !data.user) {
