@@ -80,6 +80,15 @@ Deno.serve(async (req: Request) => {
   );
   if (permissionError || authorized !== true) return json({ error: "Only college administrators can invite accounts." }, 403);
 
+  const { data: college, error: collegeError } = await callerClient
+    .from("colleges")
+    .select("code")
+    .eq("id", profile.college_id)
+    .single();
+  if (collegeError || String(college?.code ?? "").toUpperCase() !== collegeCode) {
+    return json({ error: "You can only invite accounts into your own college." }, 403);
+  }
+
   const adminClient = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
