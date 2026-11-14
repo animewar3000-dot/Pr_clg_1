@@ -255,7 +255,7 @@ export function UserRoleManagement() {
             {filteredUsers.map(user => (
               <article key={user.id} className="flex flex-col gap-3 p-5 sm:px-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0"><p className="truncate font-extrabold text-[#172B4D]">{user.display_name}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.campus_id || 'Campus ID pending'}</p></div>
+                  <div className="min-w-0"><p className="truncate font-extrabold text-[#172B4D]">{user.display_name}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.campus_id || 'Campus ID pending'}</p><p className="mt-1 text-[10px] font-semibold text-slate-400">{user.email_verified ? 'Email verified' : 'Email not verified'} · Joined {new Date(user.created_at).toLocaleDateString()}</p></div>
                   <span className={'rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-wide ' + (user.account_status === 'active' ? 'bg-emerald-50 text-emerald-700' : user.account_status === 'pending_verification' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600')}>
                     {user.account_status.replace(/_/g, ' ')}
                   </span>
