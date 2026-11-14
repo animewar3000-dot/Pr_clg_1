@@ -64,6 +64,14 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: psql -h localhost -U postgres -d campos_test -v ON_ERROR_STOP=1 -f supabase/migrations/002_secure_onboarding_and_rls.sql
+      - name: Apply user and role management migration
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d campos_test -v ON_ERROR_STOP=1 -f supabase/migrations/003_user_role_management.sql
+      - name: Verify user and role management security
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d campos_test -v ON_ERROR_STOP=1 -f supabase/tests/user_role_management_security.sql
       - name: Exercise onboarding and authorization RPCs
         env:
           PGPASSWORD: postgres
