@@ -112,7 +112,7 @@ The project is deployed on **Vercel**.
 
 Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment settings for every deployment environment you use (Production, Preview and Development), then trigger a new deployment after changing them.
 
-For administrator invitations, deploy `supabase/functions/invite-campus-user` with Supabase CLI and keep JWT verification enabled. Configure the Edge Function's `APP_URL` (for invitation redirects) and `APP_ORIGIN` (allowed browser origin). The function uses Supabase's server-provided `SUPABASE_SERVICE_ROLE_KEY`; never copy that key into Vercel or any `VITE_` variable.
+For administrator invitations, deploy `supabase/functions/invite-campus-user` with Supabase CLI and keep JWT verification enabled. Configure `APP_URL` and `APP_ORIGIN` as the same full HTTPS origin (without a trailing slash), and add `${APP_URL}/auth/reset-password` to Supabase Auth's redirect allow list. The function uses Supabase's server-provided `SUPABASE_SERVICE_ROLE_KEY`; never copy that key into Vercel or any `VITE_` variable.
 
 The repository also contains `vercel.json` for the Vite build and client-side route fallback. Do not put private backend credentials in frontend environment variables.
 
