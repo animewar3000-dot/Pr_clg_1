@@ -266,7 +266,8 @@ export function UserRoleManagement() {
                     <span key={assignment.role + '-' + assignment.scope_type + '-' + assignment.scope_id + '-' + index} className="inline-flex items-center gap-2 rounded-lg border border-[#172B4D]/10 bg-[#F8F9FC] px-2.5 py-1.5 text-[11px] font-bold text-slate-600">
                       {roleLabels[assignment.role] || assignment.role}
                       <span className="font-medium text-slate-400">· {assignment.scope_label || assignment.scope_type}</span>
-                      {user.id !== profile?.id && (
+                      {assignment.role === 'super_admin' && <span className="font-medium text-slate-400">· bootstrap only</span>}
+                      {user.id !== profile?.id && assignment.role !== 'super_admin' && (assignment.role !== 'college_admin' || isSuperAdmin) && (
                         <button type="button" onClick={() => setPendingRevoke({ userId: user.id, userName: user.display_name, assignment })} disabled={revokeMutation.isPending} aria-label={'Remove ' + roleLabels[assignment.role] + ' from ' + user.display_name} className="rounded p-0.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40">
                           <X size={13} />
                         </button>
