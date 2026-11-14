@@ -45,6 +45,7 @@ export function UserRoleManagement() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('faculty');
   const [scopeType, setScopeType] = useState<RoleScope>('college');
   const [scopeId, setScopeId] = useState('');
+  const [pendingRevoke, setPendingRevoke] = useState<{ userId: string; userName: string; assignment: ManagedRole } | null>(null);
 
   const usersQuery = useQuery<ManagedUser[]>({
     queryKey: ['admin', 'managed-users', profile?.college_id],
@@ -266,13 +267,24 @@ export function UserRoleManagement() {
                       {roleLabels[assignment.role] || assignment.role}
                       <span className="font-medium text-slate-400">· {assignment.scope_label || assignment.scope_type}</span>
                       {user.id !== profile?.id && (
-                        <button type="button" onClick={() => revokeMutation.mutate({ userId: user.id, assignment })} disabled={revokeMutation.isPending} aria-label={'Remove ' + roleLabels[assignment.role] + ' from ' + user.display_name} className="rounded p-0.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40">
+                        <button type="button" onClick={() => setPendingRevoke({ userId: user.id, userName: user.display_name, assignment })} disabled={revokeMutation.isPending} aria-label={'Remove ' + roleLabels[assignment.role] + ' from ' + user.display_name} className="rounded p-0.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-40">
                           <X size={13} />
                         </button>
                       )}
                     </span>
                   ))}
                 </div>
+                {pendingRevoke?.userId === user.id && (
+                  <div role="group" aria-label="Confirm role removal" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-3">
+                    <p className="text-xs font-semibold text-red-800">
+                      Remove {roleLabels[pendingRevoke.assignment.role]} from {pendingRevoke.userName} for {pendingRevoke.assignment.scope_label || pendingRevoke.assignment.scope_type}?
+                    </p>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setPendingRevoke(null)} className="min-h-9 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-slate-600">Keep role</button>
+                      <button type="button" onClick={() => { revokeMutation.mutate({ userId: pendingRevoke.userId, assignment: pendingRevoke.assignment }); setPendingRevoke(null); }} disabled={revokeMutation.isPending} className="min-h-9 rounded-lg bg-red-700 px-3 text-xs font-bold text-white disabled:opacity-50">Remove role</button>
+                    </div>
+                  </div>
+                )}
                 {revokeMutation.isError && <p role="alert" className="text-xs text-red-700">{errorMessage(revokeMutation.error)}</p>}
               </article>
             ))}
