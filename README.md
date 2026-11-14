@@ -79,8 +79,9 @@ In the Supabase SQL Editor, apply the files in `supabase/migrations/` in numeric
 
 1. `001_initial_schema.sql`
 2. `002_secure_onboarding_and_rls.sql`
+3. `003_user_role_management.sql`
 
-If using the newer college student ID/admin additions, also review and apply `003_college_student_id_and_jd_admin.sql` according to its contents and the current database state. Do not re-run migrations on an already configured database unless you understand their effects.
+Migration 003 adds guarded user-listing, invitation authorization and scoped role-management RPCs. Do not re-run migrations on an already configured database unless you understand their effects.
 
 For first-college and first-administrator setup, read [supabase/BOOTSTRAP_ADMIN.md](supabase/BOOTSTRAP_ADMIN.md). Use verified college information. For a demo without college-issued email accounts, the bootstrap guide explains the manual-verification approach.
 
@@ -110,6 +111,8 @@ The project is deployed on **Vercel**.
 - Output directory: `dist`
 
 Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment settings for every deployment environment you use (Production, Preview and Development), then trigger a new deployment after changing them.
+
+For administrator invitations, deploy `supabase/functions/invite-campus-user` with Supabase CLI and keep JWT verification enabled. Configure the Edge Function's `APP_URL` (for invitation redirects) and `APP_ORIGIN` (allowed browser origin). The function uses Supabase's server-provided `SUPABASE_SERVICE_ROLE_KEY`; never copy that key into Vercel or any `VITE_` variable.
 
 The repository also contains `vercel.json` for the Vite build and client-side route fallback. Do not put private backend credentials in frontend environment variables.
 
