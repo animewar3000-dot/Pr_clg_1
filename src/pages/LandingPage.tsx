@@ -120,6 +120,9 @@ export function LandingPage() {
               <p className="mt-4 max-w-sm text-sm leading-6 text-white/75">A connected space for conversations, learning and everything happening around campus.</p>
             </div>
             <div className="relative mt-8 rounded-2xl border-[2px] border-[#13171F] bg-[#F8F5EC] p-4">
+              <div className="mb-3 flex">
+                <span className="inline-flex -rotate-2 items-center rounded-lg border-2 border-[#13171F] bg-[#F5A82E] px-3 py-2 text-[11px] font-black text-[#13171F] shadow-[3px_3px_0_#13171F]">LET'S CONNECT →</span>
+              </div>
               <div className="flex items-center justify-between border-b border-[#13171F]/10 pb-3">
                 <div className="flex items-center gap-2">
                   <BrandMark size="sm" />
@@ -148,7 +151,6 @@ export function LandingPage() {
             </div>
             <div className="absolute -bottom-4 -right-3 hidden rotate-[-5deg] rounded-xl border-2 border-[#13171F] bg-[#F55C4A] px-4 py-3 text-sm font-black text-white shadow-[4px_5px_0_#13171F] sm:block">YOUR STORY STARTS HERE!</div>
           </div>
-          <div className="absolute -left-5 top-1/2 hidden -rotate-6 rounded-xl border-2 border-[#13171F] bg-[#F5A82E] px-4 py-3 text-sm font-black text-[#13171F] shadow-[4px_5px_0_#13171F] md:block">LET'S CONNECT →</div>
         </motion.div>
       </section>
 
