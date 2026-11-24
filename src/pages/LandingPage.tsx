@@ -120,8 +120,10 @@ export function LandingPage() {
               <p className="mt-4 max-w-sm text-sm leading-6 text-white/75">A connected space for conversations, learning and everything happening around campus.</p>
             </div>
             <div className="relative mt-8 rounded-2xl border-[2px] border-[#13171F] bg-[#F8F5EC] p-4">
-              <div className="mb-3 flex">
-                <span className="inline-flex -rotate-2 items-center rounded-lg border-2 border-[#13171F] bg-[#F5A82E] px-3 py-2 text-[11px] font-black text-[#13171F] shadow-[3px_3px_0_#13171F]">LET'S CONNECT →</span>
+              <div className="mb-3 flex justify-end">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F5A82E]/20 px-3 py-1.5 text-[10px] font-black tracking-[.08em] text-[#172B4D]">
+                  LET'S CONNECT <ArrowRight size={12} aria-hidden="true" />
+                </span>
               </div>
               <div className="flex items-center justify-between border-b border-[#13171F]/10 pb-3">
                 <div className="flex items-center gap-2">
