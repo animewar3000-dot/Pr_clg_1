@@ -107,7 +107,7 @@ export function LandingPage() {
         <motion.div initial={reducedMotion ? false : { opacity: 0, scale: .96, rotate: 1.4 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: reducedMotion ? 0 : .7, ease: 'easeOut' }} className="relative mx-auto w-full max-w-[620px]">
           <div className="absolute -left-6 top-10 h-32 w-32 rounded-full bg-[#F5A82E]/30 blur-2xl" />
           <div className="absolute -right-6 bottom-8 h-40 w-40 rounded-full bg-[#14A89C]/25 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border-[3px] border-[#13171F] bg-[#172B4D] p-5 shadow-[12px_14px_0_#13171F] sm:p-7">
+          <div className="relative overflow-visible rounded-[2rem] border-[3px] border-[#13171F] bg-[#172B4D] p-5 shadow-[12px_14px_0_#13171F] sm:p-7">
             <div className="absolute right-7 top-7 grid grid-cols-7 gap-2 opacity-30" aria-hidden="true">
               {Array.from({ length: 35 }).map((_, i) => <span key={i} className="h-1.5 w-1.5 rounded-full bg-white" />)}
             </div>
