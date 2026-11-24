@@ -107,7 +107,7 @@ export function LandingPage() {
         <motion.div initial={reducedMotion ? false : { opacity: 0, scale: .96, rotate: 1.4 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: reducedMotion ? 0 : .7, ease: 'easeOut' }} className="relative mx-auto w-full max-w-[620px]">
           <div className="absolute -left-6 top-10 h-32 w-32 rounded-full bg-[#F5A82E]/30 blur-2xl" />
           <div className="absolute -right-6 bottom-8 h-40 w-40 rounded-full bg-[#14A89C]/25 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border-[3px] border-[#13171F] bg-[#172B4D] p-5 shadow-[12px_14px_0_#13171F] sm:p-7">
+          <div className="relative overflow-visible rounded-[2rem] border-[3px] border-[#13171F] bg-[#172B4D] p-5 shadow-[12px_14px_0_#13171F] sm:p-7">
             <div className="absolute right-7 top-7 grid grid-cols-7 gap-2 opacity-30" aria-hidden="true">
               {Array.from({ length: 35 }).map((_, i) => <span key={i} className="h-1.5 w-1.5 rounded-full bg-white" />)}
             </div>
@@ -120,6 +120,11 @@ export function LandingPage() {
               <p className="mt-4 max-w-sm text-sm leading-6 text-white/75">A connected space for conversations, learning and everything happening around campus.</p>
             </div>
             <div className="relative mt-8 rounded-2xl border-[2px] border-[#13171F] bg-[#F8F5EC] p-4">
+              <div className="mb-3 flex justify-end">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F5A82E]/20 px-3 py-1.5 text-[10px] font-black tracking-[.08em] text-[#172B4D]">
+                  LET'S CONNECT <ArrowRight size={12} aria-hidden="true" />
+                </span>
+              </div>
               <div className="flex items-center justify-between border-b border-[#13171F]/10 pb-3">
                 <div className="flex items-center gap-2">
                   <BrandMark size="sm" />
@@ -148,7 +153,6 @@ export function LandingPage() {
             </div>
             <div className="absolute -bottom-4 -right-3 hidden rotate-[-5deg] rounded-xl border-2 border-[#13171F] bg-[#F55C4A] px-4 py-3 text-sm font-black text-white shadow-[4px_5px_0_#13171F] sm:block">YOUR STORY STARTS HERE!</div>
           </div>
-          <div className="absolute -left-5 top-1/2 hidden -rotate-6 rounded-xl border-2 border-[#13171F] bg-[#F5A82E] px-4 py-3 text-sm font-black text-[#13171F] shadow-[4px_5px_0_#13171F] md:block">LET'S CONNECT →</div>
         </motion.div>
       </section>
 

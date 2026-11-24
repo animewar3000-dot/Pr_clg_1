@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle2, Clock3, Shield, Users } from 'lucide-react';
 import { getSupabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { UserRoleManagement } from './UserRoleManagement';
 
 type PendingCampusUser = {
   id: string;
@@ -134,6 +135,8 @@ export function AdminPage() {
           </p>
         )}
       </section>
+
+      <UserRoleManagement />
 
       <section className="rounded-2xl border border-[#172B4D]/10 bg-[#F8F5EC] p-5">
         <h3 className="font-extrabold text-[#172B4D]">Security note</h3>

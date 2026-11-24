@@ -2,7 +2,17 @@
 
 This is a one-time operator procedure. Run it only from the Supabase SQL Editor while signed in as the project owner. Do not expose database-owner credentials to the browser.
 
-## 1. Register the institution
+## 1. Apply database migrations
+
+Apply these files in numeric order:
+
+1. `supabase/migrations/001_initial_schema.sql`
+2. `supabase/migrations/002_secure_onboarding_and_rls.sql`
+3. `supabase/migrations/003_user_role_management.sql`
+
+Migration 002 creates pending profiles and least-privilege student role assignments from Supabase Auth signup metadata, enables RLS on all application tables, replaces the first-pass permissive policies, and creates private Storage buckets. It also adds admin verification and direct-message RPCs. Migration 003 adds scoped user/role management RPCs and prevents direct client writes to role assignments.
+
+## 2. Register the institution
 
 Replace every placeholder with verified information from the college administration:
 
@@ -17,15 +27,6 @@ ON CONFLICT (code) DO NOTHING;
 ```
 
 The email domain must be the domain students are expected to use, without the @ symbol. If the college does not issue official email accounts, set `email_domain` to `*`; registration will still require email verification and manual administrator approval. In that mode, the administrator must verify each student's college identity before approving access.
-
-## 2. Apply database migrations
-
-Apply these files in numeric order:
-
-1. `supabase/migrations/001_initial_schema.sql`
-2. `supabase/migrations/002_secure_onboarding_and_rls.sql`
-
-Migration 002 creates pending profiles and least-privilege student role assignments from Supabase Auth signup metadata, enables RLS on all application tables, replaces the first-pass permissive policies, and creates private Storage buckets. It also adds admin verification and direct-message RPCs.
 
 ## 3. Create the first college administrator
 
@@ -65,7 +66,11 @@ Verify that exactly the intended account has the `college_admin` role before pro
 
 ## 4. Verify the first administrator
 
-Sign out and sign back in to CampOS. The administrator should see the Administration page and the pending verification queue. Use the queue to approve other pending students. Approval is performed by the `approve_campus_user` database function, not by direct client updates to protected profile fields.
+Sign out and sign back in to CampOS. The administrator should see the Administration page, pending verification queue, and Users & roles workspace. Use the queue to approve pending members. Use Users & roles to invite accounts and grant scoped roles. Approval and role changes are performed by guarded database functions, not direct client updates to protected profile or role fields.
+
+For email invitations, deploy supabase/functions/invite-campus-user with JWT verification enabled. Set APP_URL and APP_ORIGIN to the same full HTTPS origin (without a trailing slash), and add the /auth/reset-password redirect URL to Supabase Auth's redirect allow list. Supabase provides SUPABASE_SERVICE_ROLE_KEY to the Edge Function runtime; never place it in frontend environment variables or source control.
+
+College Admins can manage member roles except College Admin and Super Admin. Super Admins can also grant/revoke College Admin access. Super Admin itself is bootstrap-only and is intentionally not available in the role picker. Role changes are limited to the administrator's own college, and academic scopes are validated against that college.
 
 ## Important limitations before a campus pilot
 
